@@ -1,21 +1,27 @@
 project:
   type: website
   output-dir: docs
-  
 
 website:
-  title: "kristinart.github.io"
+  #favicon: figures/chestnut_2.png
+  title: "Kristin Art"
   navbar:
-    left:
+    title: false # change this to false!
+    logo: figures/chestnut_2.png #chestnut or chestnut_2
+    logo-alt: "Kristin Art"
+    background: primary
+    right:
       - href: index.qmd
         text: Home
+      - href: portfolio.qmd
+        text: Portfolio
       - about.qmd
+      - href: figures/Art_Kristin_Resume_07092023.pdf
+        text: CV
 
 format:
   html:
-    theme: cosmo
+    theme: slate
     css: styles.css
     toc: true
-
-editor: visual
-
+    page-layout: full
