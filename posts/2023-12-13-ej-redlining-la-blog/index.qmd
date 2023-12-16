@@ -146,7 +146,7 @@ map1
 
 #### Historical Redlining and EJ
 
-Next, I investigated the relationship between historical HOLC grades and a variety of socioeconomic and health patterns. I used `sf()` and `tidyverse()` and `ggplot2()` to load, summarize, and visualize spatial HOLC grade data from the Mapping Inequality project for LA county (Figure 2). To do so, I had to ensure that all of my data had the same Coordinate Reference Systems (CRS) by reprojecting with the `st_crs` function from the `sf()` package. Then, I found that **889 block groups (out of 6591 total) fall within areas that received historical HOLC grades.**
+Next, I investigated the relationship between historical HOLC grades and a variety of socioeconomic and health patterns. I used `sf()`, `tidyverse()` and `ggplot2()` to load, summarize, and visualize spatial HOLC grade data from the Mapping Inequality project for LA county (Figure 2). To do so, I had to ensure that all of my data had the same Coordinate Reference Systems (CRS) by reprojecting with the `st_crs` function from the `sf()` package. Then, I found that **889 block groups (out of 6591 total) fall within areas that received historical HOLC grades.**
 
 ```{r map2, eval = FALSE, fig.align = 'center', fig.cap = "**Figure 2: Historical HOLC grades in LA County.** All Los Angeles County block groups except for Santa Catalina Island and Terminal Island are outlined in grey. Block groups are colored based on historical HOLC grade categories; block groups that were not given historical HOLC grades are colored grey."}
 # load redlining data
