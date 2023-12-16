@@ -13,15 +13,18 @@ website:
     right:
       - href: index.qmd
         text: Home
-      - href: portfolio.qmd
-        text: Portfolio
+      # - href: portfolio.qmd
+      #   text: Portfolio
+      - href: posts.qmd
+        text: Projects
       - about.qmd
       - href: figures/Art_Kristin_Resume_07092023.pdf
         text: CV
 
 format:
   html:
-    theme: slate
+    theme: 
+      - styles.scss
     css: styles.css
     toc: true
     page-layout: full

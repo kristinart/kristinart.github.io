@@ -2,8 +2,12 @@
 title: "About"
 ---
 
-About this site
+![](figures/lord_of_the_squirrels.jpg){width="100%"}
 
-```{r}
-1 + 1
-```
+![](figures/tahoe_rim_1.jpeg){width="100%"}
+
+
+
+
+
+

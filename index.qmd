@@ -5,7 +5,7 @@ toc: false
 about: 
   template: trestles
   image-shape: round
-  image-width: 20em
+  image-width: 25em
   links:
     - text: LinkedIn
       href: https://www.linkedin.com/in/kristin-art-29758a224/
@@ -14,10 +14,10 @@ about:
     - text: Email
       href: kristinart21@gmail.com
 ---
-        
+
 ### Hi there!
 
-I am an environmental scientist who loves playing with data!
+My name is Kristin and I am an environmental scientist who loves playing with data! I created this website to share my professional skills and personal hobbies with people like you, so thanks for stopping by. 
 
 ---
 

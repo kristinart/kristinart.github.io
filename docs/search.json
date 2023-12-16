@@ -1,16 +1,30 @@
 [
   {
+    "objectID": "posts/2023-12-13-ej-redlining-la-blog/index.html",
+    "href": "posts/2023-12-13-ej-redlining-la-blog/index.html",
+    "title": "Environmental justice impacts of historical redlining in Los Angeles County",
+    "section": "",
+    "text": "1930 map of Los Angeles County neighborhoods divided into Home Owners’ Loan Corporation (HOLC) grades A (green; desirable) to D (red; undesirable). Photograph courtesy of Mapping Inequality"
+  },
+  {
+    "objectID": "posts/2023-12-13-ej-redlining-la-blog/index.html#footnotes",
+    "href": "posts/2023-12-13-ej-redlining-la-blog/index.html#footnotes",
+    "title": "Environmental justice impacts of historical redlining in Los Angeles County",
+    "section": "Footnotes",
+    "text": "Footnotes\n\n\nGee, G. C. (2008). A multilevel analysis of the relationship between institutional and individual racial discrimination and health status. American Journal of Public Health, 98(Supplement_1), S48-S56. [DOI: 10.2105/AJPH.98.Supplement_1.S48]↩︎\nNardone, A., Rudolph, K. E., Morello-Frosch, R., & Casey, J. A. (2021). Redlines and greenspace: The relationship between historical redlining and 2010 greenspace across the United States. Environmental Health Perspectives, 129(1), 017006. [DOI: 10.1289/EHP6729]↩︎\nHoffman, J. S., Shandas, V., & Pendleton, N. (2020). The effects of historical housing policies on resident exposure to intra-urban heat: A study of 108 US urban areas. Climate, 8(1), 12. [DOI: 10.3390/cli8010012]↩︎\nEllis-Soto, D., Chapman, M., & Locke, D. H. (2023). Historical redlining is associated with increasing geographical disparities in bird biodiversity sampling in the United States. Nature Human Behaviour, 1-9. [DOI: 10.1038/s41562-022-01389-3]↩︎\nEllis-Soto, D., Chapman, M., & Locke, D. H. (2023). Historical redlining is associated with increasing geographical disparities in bird biodiversity sampling in the United States. Nature Human Behaviour, 1-9. [DOI: 10.1038/s41562-022-01389-3]↩︎"
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "Kristin Art",
     "section": "",
-    "text": "Hi there!\nI am an environmental scientist who loves playing with data!\n\n\n\nEducation\nMS in Environmental Science & Management (expected 2024) University of California, Santa Barbara\nBS in Biological Sciences (2019) University of Southern California\n\n\n\nExperience\nEnvironmental Trainee (2023-present) Environmental Protection Agency, Washington, DC\nEnvironmental Analyst (2020-2022) San Francisco Estuary Institute, Richmond, CA"
+    "text": "Hi there!\nMy name is Kristin and I am an environmental scientist who loves playing with data! I created this website to share my professional skills and personal hobbies with people like you, so thanks for stopping by.\n\n\n\nEducation\nMS in Environmental Science & Management (expected 2024) University of California, Santa Barbara\nBS in Biological Sciences (2019) University of Southern California\n\n\n\nExperience\nEnvironmental Trainee (2023-present) Environmental Protection Agency, Washington, DC\nEnvironmental Analyst (2020-2022) San Francisco Estuary Institute, Richmond, CA"
   },
   {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About",
+    "objectID": "posts.html",
+    "href": "posts.html",
+    "title": "Projects",
     "section": "",
-    "text": "About this site\n\n1 + 1\n\n[1] 2"
+    "text": "Environmental justice impacts of historical redlining in Los Angeles County\n\n\n\n\n\n\n\nR\n\n\nQuarto\n\n\nGit\n\n\nEJ\n\n\nPollution\n\n\n\n\n\n\n\n\n\n\n\nDec 13, 2023\n\n\nKristin Art\n\n\n\n\n\n\nNo matching items"
   }
 ]
