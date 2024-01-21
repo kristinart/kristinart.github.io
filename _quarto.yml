@@ -3,11 +3,11 @@ project:
   output-dir: docs
 
 website:
-  favicon: figures/tree_logo_colors.png
+  favicon: figures/chestnut_2.png #tree_logo_colors.png
   #title: "Kristin Art"
   navbar:
     title: false # change this to false!
-    logo: figures/tree_logo_colors.png #chestnut or chestnut_2
+    logo: figures/chestnut_2.png #tree_logo_colors.png #chestnut or chestnut_2
     logo-alt: "Kristin Art"
     background: primary
     left:
