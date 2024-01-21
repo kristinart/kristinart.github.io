@@ -35,11 +35,11 @@
     "text": "Back to the East Bay and into Water Quality Work!\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nA couple weeks after graduating, I began working as an Environmental Analyst at the San Francisco Estuary Institute (SFEI). Not only was I ecstatic to be back in the East Bay Area, but the position was a wholesome blend of fieldwork, labwork, and data analysis. My team, the Nutrient Management Strategy, utilized coupled biogeochemical-hydrodynamic modeling and monitoring to understand the current and future health of the San Francisco Bay Area. I was part of the monitoring team and became the field lead of a network of water quality monitoring instruments in the San Francisco Bay called the Moored Sensor Program. This position involved everything from coordinating with US Geological Survey (USGS) collaborators for regular fieldwork to technical troubleshooting of our instruments to QA/QC of the measured data in Python. Speaking of Python, this was my first introduction to the language and boy did I struggle to learn it. It was only with the continued patience and help of my genius supervisor (and many hours on Stack Overflow) that I became proficient in the language. I laugh now because I have since fallen in love with data science and hope to spend the majority of time during my next career position coding.\n\n\n\n\n\n\nPretending to captain the research vessel (2021)\n\n\n\n\n\n\n\nEarly morning sunrise in Alviso Slough (2021)\n\n\n\n\n\n\n\nPreparing a research buoy for deployment (2022)"
   },
   {
-    "objectID": "about.html#graduate-school-and-a-shift-to-data-science-in-the-energy-sector",
-    "href": "about.html#graduate-school-and-a-shift-to-data-science-in-the-energy-sector",
+    "objectID": "about.html#graduate-school-and-my-shift-to-data-science-in-the-energy-sector",
+    "href": "about.html#graduate-school-and-my-shift-to-data-science-in-the-energy-sector",
     "title": "About",
-    "section": "Graduate School and a Shift to Data Science in the Energy Sector",
-    "text": "Graduate School and a Shift to Data Science in the Energy Sector\nIn September of 2022, I began pursuing a Master’s in Environmental Science & Management at the Bren School at the University of California, Santa Barbara. I’ve focused my coursework on energy, climate, corporate sustainability, and data science. I particularly enjoy analyzing and communicating data from the energy sector. I spent the summer of 2023 interning at the Environmental Protection Agency federal headquarters in Washington, D.C., where I did data analyses and visualizations of power sector emissions for the Clean Air Markets Division. Now, most of my focus is concentrated on finishing our group master’s project, which aims to analyze the parity between potential supply and demand of hydrogen as an alternative fuel source in California."
+    "section": "Graduate School and my Shift to Data Science in the Energy Sector",
+    "text": "Graduate School and my Shift to Data Science in the Energy Sector\nIn September of 2022, I began pursuing a Master’s in Environmental Science & Management at the Bren School at the University of California, Santa Barbara. I’ve focused my coursework on energy, climate, corporate sustainability, and data science. I particularly enjoy analyzing and communicating data from the energy sector. I spent the summer of 2023 interning at the Environmental Protection Agency federal headquarters in Washington, D.C., where I did data analyses and visualizations of power sector emissions for the Clean Air Markets Division. Now, most of my focus is concentrated on finishing our group master’s project, which aims to analyze the parity between potential supply and demand of hydrogen as an alternative fuel source in California."
   },
   {
     "objectID": "about.html#hobbies",
@@ -54,12 +54,5 @@
     "title": "Projects",
     "section": "",
     "text": "Environmental justice impacts of historical redlining in Los Angeles County\n\n\n\n\n\n\n\nR\n\n\nQuarto\n\n\nGit\n\n\nEJ\n\n\nPollution\n\n\n\n\nPresent-day effects of past injustices\n\n\n\n\n\n\nDec 13, 2023\n\n\nKristin Art\n\n\n\n\n\n\nNo matching items"
-  },
-  {
-    "objectID": "about.html#graduate-school-and-my-shift-to-data-science-in-the-energy-sector",
-    "href": "about.html#graduate-school-and-my-shift-to-data-science-in-the-energy-sector",
-    "title": "About",
-    "section": "Graduate School and my Shift to Data Science in the Energy Sector",
-    "text": "Graduate School and my Shift to Data Science in the Energy Sector\nIn September of 2022, I began pursuing a Master’s in Environmental Science & Management at the Bren School at the University of California, Santa Barbara. I’ve focused my coursework on energy, climate, corporate sustainability, and data science. I particularly enjoy analyzing and communicating data from the energy sector. I spent the summer of 2023 interning at the Environmental Protection Agency federal headquarters in Washington, D.C., where I did data analyses and visualizations of power sector emissions for the Clean Air Markets Division. Now, most of my focus is concentrated on finishing our group master’s project, which aims to analyze the parity between potential supply and demand of hydrogen as an alternative fuel source in California."
   }
 ]
