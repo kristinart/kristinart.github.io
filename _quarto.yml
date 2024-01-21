@@ -3,23 +3,35 @@ project:
   output-dir: docs
 
 website:
-  #favicon: figures/chestnut_2.png
-  title: "Kristin Art"
+  favicon: figures/tree_logo_colors.png
+  #title: "Kristin Art"
   navbar:
     title: false # change this to false!
-    logo: figures/chestnut_2.png #chestnut or chestnut_2
+    logo: figures/tree_logo_colors.png #chestnut or chestnut_2
     logo-alt: "Kristin Art"
     background: primary
-    right:
+    left:
       - href: index.qmd
         text: Home
+      - about.qmd
       # - href: portfolio.qmd
       #   text: Portfolio
       - href: posts.qmd
         text: Projects
-      - about.qmd
-      - href: figures/Art_Kristin_Resume_07092023.pdf
-        text: CV
+      - href: figures/Art_Kristin_Resume_01212024.pdf
+        text: Resume
+    
+    right: 
+      - icon: linkedin
+        href: https://www.linkedin.com/in/kristin-art-29758a224/
+      - icon: github
+        href: https://github.com/kristinart
+      - icon: envelope
+        href: mailto:kristinart21@gmail.com
+        
+    page-footer: 
+      left: 
+        - "Copyright 2023, Kristin Art"
 
 format:
   html:

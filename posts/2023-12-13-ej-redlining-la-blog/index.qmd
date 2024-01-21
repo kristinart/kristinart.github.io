@@ -1,6 +1,6 @@
 ---
 title: "Environmental justice impacts of historical redlining in Los Angeles County"
-# description: "present-day effects of historic poor decisions"
+description: "Present-day effects of past injustices"
 author: Kristin Art
 date: 12-13/2023
 categories: [R, Quarto, Git, EJ, Pollution] # self-defined categories
@@ -18,7 +18,7 @@ code-fold: true
 
 # Environmental justice impacts of historical redlining in Los Angeles County
 
-#### This blog post includes an analysis of community characteristics at the block group level and explores the relationship between historical redlining and environmental justice patterns. The full analysis can be accessed in this [Github repository](https://github.com/kristinart/ej-la-redlining-birds)
+#### This blog post includes an analysis of community characteristics at the census block group level and explores the relationship between historical redlining and environmental justice patterns. The full analysis is available in this [Github repository](https://github.com/kristinart/ej-la-redlining-birds).
 
 ### Research Question
 
@@ -38,11 +38,11 @@ The United States has a long history of institutionalized social and racial disc
 > -   [Equal access to the decision-making process to have a healthy environment in which to live, learn, and work."](https://www.epa.gov/environmentaljustice)
 :::
 
-During the 1930's, the Home Owners' Loan Corporation (HOLC) rated neighborhoods based on their perceived safety levels for real estate investment as part of the New Deal. The intention of this action was to stabilize real estate markets and promote home ownership to overcome the Great Depression. The HOLC grades ranged from A to D and were systematically used to block access to home ownership.
+During the 1930's, the Home Owners' Loan Corporation (HOLC) rated neighborhoods from A to D based on their perceived safety levels for real estate investment as part of the New Deal. The intention of this action was to promote home ownership and stabilize real estate markets to overcome the Great Depression. However, the HOLC grades were then used to systematically block access to home ownership.
 
 ![Historical HOLC grade categories given to neighborhoods based on perceived safety and desirability.](holc_grade_descriptions.png)
 
-Residents who lived in neighborhoods that were poorly graded by HOLC were denied money and insurance for homes by financial institutions. Because the worst HOLC grade was associated with the color red, this practice became known as "redlining."
+Financial institutions used these HOLC ratings to systematically deny money and home insurance to residents who lived in neighborhoods that were poorly graded. Because the worst HOLC grade was associated with the color red, this practice became known as "redlining."
 
 Redlining had substantial widespread impacts on both community wealth and health over time. The practice created economic disparities that increased poverty and decreased opportunities in the victimized neighborhoods. The long-term effects are well-studied and highly visible today. Overall, historically redlined neighborhoods:
 
@@ -50,9 +50,9 @@ Redlining had substantial widespread impacts on both community wealth and health
 
 -   contain significantly less greenspace and tree canopy cover [^2]
 
--   and are significantly hotter than non-redlined neighborhoods due to the higher proportion of heat-retaining land cover .[^3]
+-   and are significantly hotter than non-redlined neighborhoods due to the higher proportion of heat-retaining land cover.[^3]
 
-A recent study also found that historical redlining has impacted the geographic distribution of bird biodiversity observations in the US.[^4] Bird observation data is often crowd-sourced through citizen science, where normal community members (rather than scientists) report the species they see. The study found that very few bird observations come from historically redlined communities and are instead mainly provided in white and affluent neighborhoods.[^4] This fact is concerning because many conservation decisions are made based on these data, which clearly have a gap and spatial bias.
+A recent study also found that historical redlining has impacted the geographic distribution of bird biodiversity observations in the US.[^4] Bird observation data is often crowd-sourced through citizen science, where normal community members (rather than niche scientists) report the species they see. The study found that very few bird observations come from historically redlined communities and are instead mainly provided from white and affluent neighborhoods.[^4] This fact is concerning because many conservation decisions are made based on these data, which clearly have a gap and spatial bias.
 
 In this analysis, I explore the community characteristics of neighborhoods in LA county to determine how discriminatory redlining practices have left a lasting mark.
 
@@ -74,7 +74,7 @@ Lastly, I used observations of bird biodiversity in Los Angeles County that were
 
 #### Environmental Justice (EJ) Characteristics
 
-First, I explored the characteristics of block groups in LA county. To do so, I used the `sf()` and `tidyverse()` packages to load data from the EJScreen geodatabase, filter it to LA county, and summarize attributes of the block groups.
+First, I explored the characteristics of block groups in LA county. To do so, I used the `sf()` and `tidyverse()` packages to load data from the EJScreen geodatabase, filter the observations to LA county, and summarize a handful of attributes.
 
 ```{r eval = FALSE}
 # read in EJScreen data
@@ -206,7 +206,7 @@ Next, I summarized current conditions within the block groups that received hist
 
 -   percentile for air toxics cancer risk
 
-To do so, I used the `st_intersection()` function from the `sf()` package to select only the 889 block groups that had historical HOLC grades assigned to them. Then, I used the `kable()` function from the `kableExtra()` package to summarize the mean of the variables of interest (Table 1).
+To do so, I used the `st_intersection()` function from the `sf()` package to select only the 889 block groups that had historical HOLC grades assigned to them. Then, I used the `kable()` function from the `kableExtra()` package to summarize the mean of the variables of interest in a table (Table 1).
 
 ```{r eval = FALSE}
 # create intersection of redlining data and bg data
@@ -240,7 +240,7 @@ table1
 
 ![**Table 1: Mean values of four EJScreen Indicators in block groups of each historical HOLC grade.**](indicators_table.png)
 
-The results show that the mean value of all four EJScreen variables we looked at increase as HOLC grades descrease. This means that **people who currently live in block groups that were given HOLC grades C (yellow) and D (red) in the past are exposed to higher amounts of environmental toxins (e.g., PM 2.5) and have higher health risks (e.g., risk of cancer from air toxics and lower life expectancy). Block groups that were given lower HOLC grades in the past also have a higher percent of low-income households in the present.**
+The results show that the mean value of all four EJScreen variables I looked at increase as HOLC grades decreases. This means that **people who currently live in block groups that were given HOLC grades C (yellow) and D (red) in the past are exposed to higher amounts of environmental toxins (e.g., PM 2.5) and have higher health risks (e.g., risk of cancer from air toxics and lower life expectancy). Block groups that were given lower HOLC grades in the past also have a higher percent of low-income households in the present.**
 
 #### Historical Redlining and Biodiversity Observations
 

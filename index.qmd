@@ -5,13 +5,16 @@ toc: false
 about: 
   template: trestles
   image-shape: round
-  image-width: 25em
+  image-width: 20em
   links:
-    - text: LinkedIn
+    - icon: linkedin
+      text: LinkedIn
       href: https://www.linkedin.com/in/kristin-art-29758a224/
-    - text: GitHub
+    - icon: github
+      text: GitHub
       href: https://github.com/kristinart
-    - text: Email
+    - icon: envelope
+      text: Email
       href: kristinart21@gmail.com
 ---
 
