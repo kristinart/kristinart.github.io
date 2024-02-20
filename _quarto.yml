@@ -29,9 +29,9 @@ website:
       - icon: envelope
         href: mailto:kristinart21@gmail.com
         
-    page-footer: 
-      left: 
-        - "Copyright 2024, Kristin Art"
+  page-footer: 
+    left: 
+      - "Copyright 2024, Kristin Art"
 
 format:
   html:
