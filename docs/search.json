@@ -14,6 +14,20 @@
     "text": "Footnotes\n\n\nGee, G. C. (2008). A multilevel analysis of the relationship between institutional and individual racial discrimination and health status. American Journal of Public Health, 98(Supplement_1), S48-S56. [DOI: 10.2105/AJPH.98.Supplement_1.S48]↩︎\nNardone, A., Rudolph, K. E., Morello-Frosch, R., & Casey, J. A. (2021). Redlines and greenspace: The relationship between historical redlining and 2010 greenspace across the United States. Environmental Health Perspectives, 129(1), 017006. [DOI: 10.1289/EHP6729]↩︎\nHoffman, J. S., Shandas, V., & Pendleton, N. (2020). The effects of historical housing policies on resident exposure to intra-urban heat: A study of 108 US urban areas. Climate, 8(1), 12. [DOI: 10.3390/cli8010012]↩︎\nEllis-Soto, D., Chapman, M., & Locke, D. H. (2023). Historical redlining is associated with increasing geographical disparities in bird biodiversity sampling in the United States. Nature Human Behaviour, 1-9. [DOI: 10.1038/s41562-022-01389-3]↩︎\nEllis-Soto, D., Chapman, M., & Locke, D. H. (2023). Historical redlining is associated with increasing geographical disparities in bird biodiversity sampling in the United States. Nature Human Behaviour, 1-9. [DOI: 10.1038/s41562-022-01389-3]↩︎"
   },
   {
+    "objectID": "posts/2023-12-17-houston-blackouts-ej/index.html",
+    "href": "posts/2023-12-17-houston-blackouts-ej/index.html",
+    "title": "Geospatial extent of power outages in Houston, Texas caused by Winter Storm Uri in 2021",
+    "section": "",
+    "text": "Power lines damaged by Winter Storm Uri in February 2021. Photograph sourced from https://www.crawco.com/blog/energy-companies-deal-with-the-aftermath-of-winter-storms-uri-and-viola"
+  },
+  {
+    "objectID": "posts/2023-12-17-houston-blackouts-ej/index.html#footnotes",
+    "href": "posts/2023-12-17-houston-blackouts-ej/index.html#footnotes",
+    "title": "Geospatial extent of power outages in Houston, Texas caused by Winter Storm Uri in 2021",
+    "section": "Footnotes",
+    "text": "Footnotes\n\n\nThe Great Texas Freeze: February 11-20, 2021 (2023). National Centers for Environmental Information. National Oceanic and Atmospheric Administration. [https://www.ncei.noaa.gov/news/great-texas-freeze-february-2021]↩︎\nDoss-Gollin, J., Farnham, D.J., Lall, U., & Modi, V. (2021). How unprecedented was the February 2021 Texas cold snap? Environmental Research Letters, 16 (6). [DOI 10.1088/1748-9326/ac0278]↩︎\nThe Great Texas Freeze: February 11-20, 2021 (2023). National Centers for Environmental Information. National Oceanic and Atmospheric Administration. [https://www.ncei.noaa.gov/news/great-texas-freeze-february-2021]↩︎\nLi, Z., Li, X., Wang, Y., Quiring, S.M. (2019). Impact of climate change on precipitation patterns in Houston, Texas, USA. Anthropocene, 25. [DOI10.1016/j.ancene.2019.100193]↩︎\nLi, Z., Li, X., Wang, Y., Quiring, S.M. (2019). Impact of climate change on precipitation patterns in Houston, Texas, USA. Anthropocene, 25. [DOI10.1016/j.ancene.2019.100193]↩︎\nKaufmann, R.K., Kelly-Fair, M., Schroer, C. (2024). Distributive energy justice: Who lost power in Texas during the 2021 winter storm? Energy Research & Social Science, 109. [https://doi.org/10.1016/j.erss.2024.103416]↩︎\nKaufmann, R.K., Kelly-Fair, M., Schroer, C. (2024). Distributive energy justice: Who lost power in Texas during the 2021 winter storm? Energy Research & Social Science, 109. [https://doi.org/10.1016/j.erss.2024.103416]↩︎"
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "Kristin Art",
@@ -54,19 +68,5 @@
     "title": "Projects",
     "section": "",
     "text": "Geospatial extent of power outages in Houston, Texas caused by Winter Storm Uri in 2021\n\n\n\n\n\n\n\nR\n\n\nQuarto\n\n\nGit\n\n\nSpatial\n\n\nEJ\n\n\n\n\nSpatial analysis using satellite data\n\n\n\n\n\n\nDec 16, 2023\n\n\nKristin Art\n\n\n\n\n\n\n  \n\n\n\n\nEnvironmental justice impacts of historical redlining in Los Angeles County\n\n\n\n\n\n\n\nR\n\n\nQuarto\n\n\nGit\n\n\nSpatial\n\n\nEJ\n\n\nPollution\n\n\n\n\nPresent-day effects of past injustices\n\n\n\n\n\n\nDec 13, 2023\n\n\nKristin Art\n\n\n\n\n\n\nNo matching items"
-  },
-  {
-    "objectID": "posts/2023-12-17-houston-blackouts-ej/index.html",
-    "href": "posts/2023-12-17-houston-blackouts-ej/index.html",
-    "title": "Geospatial extent of power outages in Houston, Texas caused by Winter Storm Uri in 2021",
-    "section": "",
-    "text": "Power lines damaged by Winter Storm Uri in February 2021. Photograph sourced from https://www.crawco.com/blog/energy-companies-deal-with-the-aftermath-of-winter-storms-uri-and-viola"
-  },
-  {
-    "objectID": "posts/2023-12-17-houston-blackouts-ej/index.html#footnotes",
-    "href": "posts/2023-12-17-houston-blackouts-ej/index.html#footnotes",
-    "title": "Geospatial extent of power outages in Houston, Texas caused by Winter Storm Uri in 2021",
-    "section": "Footnotes",
-    "text": "Footnotes\n\n\nThe Great Texas Freeze: February 11-20, 2021 (2023). National Centers for Environmental Information. National Oceanic and Atmospheric Administration. [https://www.ncei.noaa.gov/news/great-texas-freeze-february-2021]↩︎\nDoss-Gollin, J., Farnham, D.J., Lall, U., & Modi, V. (2021). How unprecedented was the February 2021 Texas cold snap? Environmental Research Letters, 16 (6). [DOI 10.1088/1748-9326/ac0278]↩︎\nThe Great Texas Freeze: February 11-20, 2021 (2023). National Centers for Environmental Information. National Oceanic and Atmospheric Administration. [https://www.ncei.noaa.gov/news/great-texas-freeze-february-2021]↩︎\nLi, Z., Li, X., Wang, Y., Quiring, S.M. (2019). Impact of climate change on precipitation patterns in Houston, Texas, USA. Anthropocene, 25. [DOI10.1016/j.ancene.2019.100193]↩︎\nLi, Z., Li, X., Wang, Y., Quiring, S.M. (2019). Impact of climate change on precipitation patterns in Houston, Texas, USA. Anthropocene, 25. [DOI10.1016/j.ancene.2019.100193]↩︎\nKaufmann, R.K., Kelly-Fair, M., Schroer, C. (2024). Distributive energy justice: Who lost power in Texas during the 2021 winter storm? Energy Research & Social Science, 109. [https://doi.org/10.1016/j.erss.2024.103416]↩︎\nKaufmann, R.K., Kelly-Fair, M., Schroer, C. (2024). Distributive energy justice: Who lost power in Texas during the 2021 winter storm? Energy Research & Social Science, 109. [https://doi.org/10.1016/j.erss.2024.103416]↩︎"
   }
 ]
