@@ -119,23 +119,23 @@ map1 <- ggplot() +
   scale_colour_manual(name = "Above 95th \npercentile", values = "black") +
   labs(fill = "Wastewater \nDischarge \nIndicator") +
   scale_fill_gradientn(colors = c("#6AA08E", "#F4E07C", "#C25B60"), values = scales::rescale(c(1, 2, 3, 4)), limits = c(0, 200)) +
-  annotation_scale(location = "br", style = "ticks", text_cex = 1) +
+  annotation_scale(location = "br", style = "ticks", text_cex = 3) +
   annotation_north_arrow(
     location = "br",
     pad_x = unit(0.4, "in"),
     pad_y = unit(0.2, "in"),
-    style = ggspatial::north_arrow_nautical(text_size = 24)
+    style = ggspatial::north_arrow_nautical(text_size = 40)
   ) +
   theme_bw() +
   theme(
     panel.grid = element_line(color = "grey97"),
-    axis.text.x = element_text(size = 12),
-    axis.text.y = element_text(size = 12),
-    legend.text = element_text(size = 14, hjust = 0.5),
-    legend.title = element_text(size = 14, hjust = 0.5, margin = margin(b = 8))
+    axis.text.x = element_text(family = "quicksand",size = 35),
+    axis.text.y = element_text(family = "quicksand", size = 35),
+    legend.text = element_text(lineheight = 0.3, family = "quicksand",size = 40, hjust = 0.5),
+    legend.title = element_text(lineheight = 0.3, family = "quicksand",size = 45, hjust = 0.5, margin = margin(b = 1))
   ) +
   guides(
-    fill = guide_colorbar(order = 1, draw.ulim = TRUE, draw.llim = TRUE),
+    fill = guide_colorbar(order = 1, draw.ulim = TRUE, draw.llim = TRUE, barheight = 12, barwidth = 1),
     color = guide_legend(order = 2)
   )
 
@@ -143,7 +143,7 @@ map1
 
 ```
 
-![**Figure 1: Wastewater discharge by block group in LA County.** All Los Angeles County block groups except for Santa Catalina Island and Terminal Island are outlined in grey. Block groups are colored based on EJScreen wastewater discharge indicator values. Block groups that are above the 95th percentile of national values for wastewater discharge are identified by black dots.](la_wastewater_discharge_map 2.png)
+![**Figure 1: Wastewater discharge by block group in LA County.** All Los Angeles County block groups except for Santa Catalina Island and Terminal Island are outlined in grey. Block groups are colored based on EJScreen wastewater discharge indicator values. Block groups that are above the 95th percentile of national values for wastewater discharge are identified by black dots.](la_wastewater_discharge_map.png)
 
 #### Historical Redlining and EJ
 
@@ -176,33 +176,38 @@ map2 <- ggplot() +
   geom_sf(data = LA_redlining, aes(fill = grade)) +
   scale_fill_manual(values = c("#97BB77", "#6AA08E", "#F4E07C", "#C25B60")) +
   labs(fill = "HOLC Grade") +
-  annotation_scale(location = "br", style = "ticks", text_cex = 1) +
+  annotation_scale(location = "br", style = "ticks", text_cex = 3) +
   annotation_north_arrow(
     location = "br",
     pad_x = unit(0.4, "in"),
     pad_y = unit(0.2, "in"),
-    style = ggspatial::north_arrow_nautical(text_size = 24)
+    style = ggspatial::north_arrow_nautical(text_size = 35)
   ) +
   theme_bw() +
   theme(
-    axis.text.x = element_text(size = 12),
-    axis.text.y = element_text(size = 12),
-    legend.text = element_text(size = 14),
-    legend.title = element_text(size = 14),
+    text = element_text(family = "quicksand"),
+    axis.text.x = element_text(size = 35),
+    axis.text.y = element_text(size = 35),
+    legend.text = element_text(size = 40),
+    legend.title = element_text(size = 45),
     panel.grid = element_line(color = "grey97")
+  )  +
+  guides(
+    fill = guide_legend(keyheight = 2, keywidth = 2)
   )
+
 
 map2
 
 ```
 
-![**Figure 2: Historical HOLC grades in LA County.** All Los Angeles County block groups except for Santa Catalina Island and Terminal Island are outlined in grey. Block groups are colored based on historical HOLC grade categories; block groups that were not given historical HOLC grades are colored grey.](la_holc_grades_map 2.png)
+![**Figure 2: Historical HOLC grades in LA County.** All Los Angeles County block groups except for Santa Catalina Island and Terminal Island are outlined in grey. Block groups are colored based on historical HOLC grade categories; block groups that were not given historical HOLC grades are colored grey.](la_holc_grades_map.png)
 
 Next, I summarized current conditions within the block groups that received historical HOLC grades by calculating the mean, or average value, of the following EJScreen variables:
 
 -   \% low income
 
--   percentile for particulate Matter 2.5
+-   percentile for P articulate Matter 2.5
 
 -   percentile for low life expectancy
 
@@ -233,13 +238,15 @@ bg_holc_summary <- bg_holc %>%
 
 # create summary table
 table1 <- bg_holc_summary %>%
-  kable(col.names = c("HOLC Grade", "% Low Income", "PM 2.5 Percentile", "Low Life Expectancy Percentile", "Air Toxics Cancer Risk Percentile"), escape = FALSE, align = "c") %>% # , caption = "Mean values of four EJScreen Indicators for block groups that were historically designated each HOLC grade."
+  kable(html_font = "Quicksand", col.names = c("HOLC Grade", "% Low Income", "PM 2.5 Percentile", "Low Life Expectancy Percentile", "Air Toxics Cancer Risk Percentile"), escape = FALSE, align = "c") %>% # , caption = "Mean values of four EJScreen Indicators for block groups that were historically designated each HOLC grade."
   kable_paper(full_width = FALSE) %>%
-  kable_styling(font_size = 24)
+  kable_styling(font_size = 24, html_font = "Quicksand")
+
+table1
 
 ```
 
-![**Table 1: Mean values of four EJScreen Indicators in block groups of each historical HOLC grade.**](indicators_table 2.png)
+![**Table 1: Mean values of four EJScreen Indicators in block groups of each historical HOLC grade.**](indicators_table.png)
 
 The results show that the mean value of all four EJScreen variables I looked at increase as HOLC grades decreases. This means that **people who currently live in block groups that were given HOLC grades C (yellow) and D (red) in the past are exposed to higher amounts of environmental toxins (e.g., PM 2.5) and have higher health risks (e.g., risk of cancer from air toxics and lower life expectancy). Block groups that were given lower HOLC grades in the past also have a higher percent of low-income households in the present.**
 
@@ -280,30 +287,29 @@ birds_redlining_summary <- birds_redlining_2022 %>%
 # plot
 plot1 <- ggplot(data = birds_redlining_summary) +
   geom_col(aes(x = grade, y = perc, fill = grade)) +
-  geom_text(aes(x = grade, y = perc, label = round(as.numeric(perc))), vjust = -0.5, size = 6) +
+  geom_text(aes(x = grade, y = perc, label = round(as.numeric(perc))), vjust = -0.5, size = 16, family = "quicksand") +
   # scale_fill_manual(values = c("#9C964A","#F3DF6C","#DC863B", "#C93312"))+
   scale_y_continuous(limits = c(0, 39), expand = c(0,0))+
   scale_fill_manual(values = c("#97BB77", "#6AA08E", "#F4E07C", "#C25B60")) +
   labs(y = "Percent of Total Observations (%)", x = "HOLC Grade", title = "Percent of Bird Observations in 2022 by Historic HOLC Grade", fill = "HOLC Grade") +
   theme_bw() +
   theme(
+    text = element_text(family = "quicksand"),
     legend.position = "none",
-    plot.title = element_text(size = 18, hjust = 0.5),
-    axis.title.x = element_text(size = 14),
-    axis.title.y = element_text(size = 14),
-    axis.text.x = element_text(size = 12),
-    axis.text.y = element_text(size = 12),
+    plot.title = element_text(size = 45, hjust = 0.5),
+    axis.title.x = element_text(size = 40),
+    axis.title.y = element_text(size = 40),
+    axis.text.x = element_text(size = 35),
+    axis.text.y = element_text(size = 35),
     panel.grid = element_line(color = "grey97"),
     panel.grid.major.x = element_blank()
   )
 
 plot1
 
-# save figure
-ggsave("figures/la_holc_bird_observations.png", plot1, width = 8, height = 6, units = "in")
 ```
 
-![**Figure 3: Percentage of total bird observations in 2022 that occurred in block groups of each historical HOLC grade.** Bar colors represent HOLC grades and values (%) are depicted above each bar.](la_holc_bird_observations 2.png)
+![**Figure 3: Percentage of total bird observations in 2022 that occurred in block groups of each historical HOLC grade.** Bar colors represent HOLC grades and values (%) are depicted above each bar.](la_holc_bird_observations.png)
 
 I found that the majority of bird observations in 2022 actually occurred in neighborhoods that were historically HOLC grades C and D (36% and 29% respectively). This means that **most of the bird observations last year were made in block groups that were historically given low HOLC grades rather than those that were given high HOLC grades.**
 
