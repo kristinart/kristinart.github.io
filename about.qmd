@@ -1,5 +1,9 @@
 ---
 title: "About"
+#description: "Spatial analysis using satellite data"
+toc: true
+toc-depth: 3
+toc-title: Contents
 ---
 #### Here's a little (actually a lot) of information about me, if you're interested.
 

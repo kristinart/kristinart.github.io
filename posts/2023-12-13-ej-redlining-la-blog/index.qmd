@@ -10,6 +10,8 @@ image: preview.png
 draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
 #bibliography: references.bib
 code-fold: true
+toc-depth: 4
+toc-title: Contents
 ---
 
 ::: column-body-outset
@@ -18,7 +20,7 @@ code-fold: true
 
 # Environmental justice impacts of historical redlining in Los Angeles County
 
-#### This blog post includes an analysis of community characteristics at the census block group level and explores the relationship between historical redlining and environmental justice patterns. The full analysis is available in this [Github repository](https://github.com/kristinart/ej-la-redlining-birds).
+##### This blog post includes an analysis of community characteristics at the census block group level and explores the relationship between historical redlining and environmental justice patterns. The full analysis is available in this [Github repository](https://github.com/kristinart/ej-la-redlining-birds).
 
 ### Research Question
 
