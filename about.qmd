@@ -14,7 +14,7 @@ toc-title: Contents
 ![](figures/old_figures/IMG_1676.jpeg)
 ::: 
 
-I enjoy analyzing and communicating data to tell stories about how electricity generation is related to emissions, ambient air quality, and environmental justice. I use both statistical analysis (including statistical machine learning algorithms) and spatial analysis to do so. I prefer to work in the R language and am in the process of populating the projects tab of this website with more of my recent work.
+I enjoy analyzing and visualizing data to tell stories about how electricity generation is related to emissions, ambient air quality, and environmental justice. I use both statistical analysis (including statistical machine learning algorithms) and spatial analysis to do so. I prefer to work in the R language and am in the process of populating the projects tab of this website with more of my recent work.
 
 ## Graduate School
 
@@ -59,7 +59,7 @@ Speaking of Python, this was my first introduction to the language, and boy, did
 
 ## University of Southern California
 
-Before working at SFEI, I attended the University of Southern California (USC) between January 2017-December 2019. I graduated with a Bachelor of Science in Biological Sciences and an emphasis in Marine and Environmental Biology. Not only was I lucky enough to receive a full ride (since I am a first-generation college student from a low-income family), but I also assisted two research labs while there. In the research labs, I helped multiple PhD students study the growth and toxicity of phytoplankton species under various climate conditions. Although I have since steered my career away from this topic, I still love geeking out about phytoplankton and harmful blooms. 
+Before working at SFEI, I attended the University of Southern California (USC) between January 2017-December 2019. I graduated with a Bachelor of Science in Biological Sciences and an emphasis in Marine and Environmental Biology. Not only was I lucky enough to receive a full ride (since I am a first-generation college student from a low-income family), but I also assisted two research labs while there. In the research labs, I helped multiple PhD students study the growth and toxicity of phytoplankton species under various climate conditions. Although I have since steered my career away from this topic, I still love geeking out about phytoplankton and harmful algal blooms. 
 
 
 ## Growing Up
