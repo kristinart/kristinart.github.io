@@ -14,7 +14,7 @@ toc-title: Contents
 ![](figures/old_figures/IMG_1676.jpeg)
 ::: 
 
-I enjoy analyzing and communicating data from the energy sector to tell stories about how the energy sector intersects with emissions, ambient air quality, and environmental justice. I use both statistical analysis (including statistical machine learning algorithms) and spatial analysis to do so. I prefer to work in the R language and am in the process of populating the projects tab of this website with more of my recent work.
+I enjoy analyzing and communicating data to tell stories about how electricity generation is related to emissions, ambient air quality, and environmental justice. I use both statistical analysis (including statistical machine learning algorithms) and spatial analysis to do so. I prefer to work in the R language and am in the process of populating the projects tab of this website with more of my recent work.
 
 ## Graduate School
 
