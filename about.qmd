@@ -5,7 +5,9 @@ toc: true
 toc-depth: 3
 toc-title: Contents
 ---
-
+<meta http-equiv='cache-control' content='no-cache'> 
+<meta http-equiv='expires' content='0'> 
+<meta http-equiv='pragma' content='no-cache'>
 ::: {layout-ncol="3" layout-valign="center"}
 ![](figures/old_figures/IMG_1946.jpeg)
 
