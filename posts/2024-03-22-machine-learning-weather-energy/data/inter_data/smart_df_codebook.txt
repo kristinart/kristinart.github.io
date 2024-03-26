@@ -1,0 +1,41 @@
+Name / Data Type / Measurement Unit / Description
+-----------------------------
+Date / Date object / -- / date of observation in YYYY-MM-DD format
+
+Hour / continuous / hour / hour of observation where 0 is between 12AM-12:59AM and 23 is between 11PM-11:59PM
+
+Apt_id / continuous / -- / numeric ID for apartment that observation came from. Included 50 random apartment IDs sampled from the full range of 1-114.
+
+Hourly_average_power_kw / continuous / kW / hourly average amount of energy consumed in kiloWatts
+
+Temperature / continuous / degrees Fahrenheit / temperature in degrees Fahrenheit
+
+Icon / nominal / -- / character string describing the overall weather for the observation and the time category (day vs. night)
+
+Humidity / continuous / g/m^3 / humidity level measured in grams water vapor per cubic meter of air
+
+Visibility / continuous / m / optical visibility measured in meters
+
+Summary / nominal / -- / character string describing the overall weather for the observation
+
+Apparent_temperature / continuous / degrees Fahrenheit / "feels like" temperature equivalent that is perceived by humans; based on temperature, wind speed, and humidity.
+
+Pressure / continuous / mbar/ air pressure in millibars
+
+Wind_speed / continuous / mph / speed of wind in miles per hour
+
+Time / Unix object / -- / time of observation in Unix timestamp
+
+Wind_bearing / continuous / degrees / wind direction in angular distance relative to North
+
+Precipitation_intensity / continuous / mm/hr / rainfall in mm rain per hour
+
+Dew_point / continuous / degrees Fahrenheit / temperature to which air must be cooled to reach saturation 
+
+Precipitation_probability / continuous / -- / probability of precipitation as a value between 0 to 1 
+
+Datetime / POSIXct object / -- / date and time of observation in POSIXct
+
+Month / continuous / month / numeric value representing month where 1 is January and 12 is December
+
+Year / continuous / year / numeric value representing year. Range between 2014-2016.
