@@ -3,7 +3,7 @@ title: "Vizualizing California's Green Hydrogen Supply and Transportation Sector
 description: "Data viz for science communication"
 author: Kristin Art
 date: 3-6/2024
-categories: [R, Quarto, Git, Spatial, Viz] # self-defined categories
+categories: [R, Quarto, Git, Spatial, Viz, Energy] # self-defined categories
 #citation: 
 #  url: https://samanthacsik.github.io/posts/2022-10-24-my-blog-post/ 
 image: histogram.png

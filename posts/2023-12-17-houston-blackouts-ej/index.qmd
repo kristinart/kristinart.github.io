@@ -3,7 +3,7 @@ title: "Geospatial extent of power outages in Houston, Texas caused by Winter St
 description: "Spatial analysis using satellite data"
 author: Kristin Art
 date: 12-16/2023
-categories: [R, Quarto, Git, Spatial, EJ] # self-defined categories
+categories: [R, Quarto, Git, Spatial, EJ, Energy] # self-defined categories
 #citation: 
 #  url: https://samanthacsik.github.io/posts/2022-10-24-my-blog-post/ 
 image: preview.png
