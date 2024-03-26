@@ -1,0 +1,2180 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.323">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Kristin Art">
+<meta name="dcterms.date" content="2024-03-22">
+<meta name="description" content="Machine learning models to predict energy use">
+
+<title>Predicting Residential Energy Usage based on Weather</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<link href="../../../figures/chestnut_2.png" rel="icon" type="image/png">
+<script src="../../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+<script src="../../../site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="../../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a href="../../../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../../../figures/chestnut_2.png" alt="Kristin Art" class="navbar-logo">
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../index.html" rel="" target="">
+ <span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../posts.html" rel="" target="">
+ <span class="menu-text">Projects</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../figures/Art_Kristin_Resume_02022024.pdf" rel="" target="">
+ <span class="menu-text">Resume</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/kristin-art-29758a224/" rel="" target=""><i class="bi bi-linkedin" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/kristinart" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="mailto:kristinart21@gmail.com" rel="" target=""><i class="bi bi-envelope" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#predicting-residential-energy-usage-based-on-weather" id="toc-predicting-residential-energy-usage-based-on-weather" class="nav-link active" data-scroll-target="#predicting-residential-energy-usage-based-on-weather">Predicting Residential Energy Usage based on Weather</a>
+  <ul class="collapse">
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction">Introduction</a>
+  <ul class="collapse">
+  <li><a href="#research-question" id="toc-research-question" class="nav-link" data-scroll-target="#research-question">Research Question</a></li>
+  <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data">Data</a></li>
+  <li><a href="#project-approach" id="toc-project-approach" class="nav-link" data-scroll-target="#project-approach">Project Approach</a></li>
+  </ul></li>
+  <li><a href="#load-and-tidy-data" id="toc-load-and-tidy-data" class="nav-link" data-scroll-target="#load-and-tidy-data">Load and Tidy Data</a></li>
+  <li><a href="#exploratory-data-analysis" id="toc-exploratory-data-analysis" class="nav-link" data-scroll-target="#exploratory-data-analysis">Exploratory Data Analysis</a></li>
+  <li><a href="#visual-exploratory-data-analysis" id="toc-visual-exploratory-data-analysis" class="nav-link" data-scroll-target="#visual-exploratory-data-analysis">Visual Exploratory Data Analysis</a>
+  <ul class="collapse">
+  <li><a href="#correlation-plot" id="toc-correlation-plot" class="nav-link" data-scroll-target="#correlation-plot">Correlation Plot</a></li>
+  <li><a href="#power-usage-distribution" id="toc-power-usage-distribution" class="nav-link" data-scroll-target="#power-usage-distribution">Power Usage Distribution</a></li>
+  <li><a href="#power-usage-by-month" id="toc-power-usage-by-month" class="nav-link" data-scroll-target="#power-usage-by-month">Power Usage by Month</a></li>
+  <li><a href="#temperature-distribution" id="toc-temperature-distribution" class="nav-link" data-scroll-target="#temperature-distribution">Temperature Distribution</a></li>
+  </ul></li>
+  <li><a href="#model-set-up" id="toc-model-set-up" class="nav-link" data-scroll-target="#model-set-up">Model Set-Up</a>
+  <ul class="collapse">
+  <li><a href="#split-training-and-testing-data" id="toc-split-training-and-testing-data" class="nav-link" data-scroll-target="#split-training-and-testing-data">Split Training and Testing Data</a></li>
+  <li><a href="#k-fold-cross-validation" id="toc-k-fold-cross-validation" class="nav-link" data-scroll-target="#k-fold-cross-validation">K-Fold Cross Validation</a></li>
+  <li><a href="#build-recipe" id="toc-build-recipe" class="nav-link" data-scroll-target="#build-recipe">Build Recipe</a></li>
+  </ul></li>
+  <li><a href="#model-building" id="toc-model-building" class="nav-link" data-scroll-target="#model-building">Model Building</a>
+  <ul class="collapse">
+  <li><a href="#linear-regression" id="toc-linear-regression" class="nav-link" data-scroll-target="#linear-regression">Linear Regression</a></li>
+  <li><a href="#k-nearest-neighbor" id="toc-k-nearest-neighbor" class="nav-link" data-scroll-target="#k-nearest-neighbor">K-Nearest Neighbor</a></li>
+  <li><a href="#elastic-net-regression" id="toc-elastic-net-regression" class="nav-link" data-scroll-target="#elastic-net-regression">Elastic Net Regression</a></li>
+  <li><a href="#random-forest" id="toc-random-forest" class="nav-link" data-scroll-target="#random-forest">Random Forest</a></li>
+  <li><a href="#gradient-boosted-tree" id="toc-gradient-boosted-tree" class="nav-link" data-scroll-target="#gradient-boosted-tree">Gradient-Boosted Tree</a></li>
+  </ul></li>
+  <li><a href="#model-results" id="toc-model-results" class="nav-link" data-scroll-target="#model-results">Model Results</a>
+  <ul class="collapse">
+  <li><a href="#linear-regression-1" id="toc-linear-regression-1" class="nav-link" data-scroll-target="#linear-regression-1">Linear Regression</a></li>
+  <li><a href="#k-nearest-neighbor-1" id="toc-k-nearest-neighbor-1" class="nav-link" data-scroll-target="#k-nearest-neighbor-1">K-Nearest Neighbor</a></li>
+  <li><a href="#elastic-net-regression-1" id="toc-elastic-net-regression-1" class="nav-link" data-scroll-target="#elastic-net-regression-1">Elastic Net Regression</a></li>
+  <li><a href="#random-forest-1" id="toc-random-forest-1" class="nav-link" data-scroll-target="#random-forest-1">Random Forest</a></li>
+  <li><a href="#gradient-boosted-tree-1" id="toc-gradient-boosted-tree-1" class="nav-link" data-scroll-target="#gradient-boosted-tree-1">Gradient-Boosted Tree</a></li>
+  </ul></li>
+  <li><a href="#best-model-results" id="toc-best-model-results" class="nav-link" data-scroll-target="#best-model-results">Best Model Results</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content page-columns page-full column-page-left" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Predicting Residential Energy Usage based on Weather</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">R</div>
+    <div class="quarto-category">Quarto</div>
+    <div class="quarto-category">Git</div>
+    <div class="quarto-category">Energy</div>
+    <div class="quarto-category">Machine Learning</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    Machine learning models to predict energy use
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Kristin Art </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 22, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="expires" content="0">
+<meta http-equiv="pragma" content="no-cache">
+<div class="column-body-outset">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../preview.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Conceptual diagram of the relationship between weather and residential energy. Photograph sourced from https://vectormine.com/item/weather-impact-on-energy-consumption-and-household-usage-outline-concept/.</figcaption><p></p>
+</figure>
+</div>
+</div>
+<section id="predicting-residential-energy-usage-based-on-weather" class="level1">
+<h1>Predicting Residential Energy Usage based on Weather</h1>
+<section id="this-blog-post-includes-an-analysis-in-which-i-build-and-compare-machine-learning-models-that-predict-residential-energy-usage-from-weather-patterns.-the-full-analysis-is-available-in-this-github-repository." class="level4">
+<h4 class="anchored" data-anchor-id="this-blog-post-includes-an-analysis-in-which-i-build-and-compare-machine-learning-models-that-predict-residential-energy-usage-from-weather-patterns.-the-full-analysis-is-available-in-this-github-repository.">This blog post includes an analysis in which I build and compare machine learning models that predict residential energy usage from weather patterns. The full analysis is available in this <a href="https://github.com/kristinart/predicting-residential-energy-usage">Github repository</a>.</h4>
+</section>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>It is important to understand the relationship between weather and energy consumption to inform how we plan and manage energy infrastructure to meet high energy demand events. <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> Understanding this relationship at a fine temporal and spatial scale could allow us to mitigate the extent of weather-related energy strain and impact on people. This is especially relevant in today’s day and age, as climate change alters regional temperatures and increases the frequency of extreme weather events. Improving the efficiency of energy consumption will work in tandem with grid modernization to meet climate and sustainability goals.</p>
+<p>In this project, I investigate how energy use within residential homes varies based on weather. Past research has shown that there is significant variation in residential energy use within a day. <a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> This intuitively makes sense, as most people turn their lights on at night and use more cooking appliances around mealtimes. It’s also well-known that more energy is consumed during the winter months in cold regions due to the generation of heat for warmth. Here, I use high-resolution data from residential apartments to build models that predict hourly energy consumption based on weather patterns.</p>
+<section id="research-question" class="level3">
+<h3 class="anchored" data-anchor-id="research-question">Research Question</h3>
+<p>What weather patterns are good predictors of residential energy usage in Massachussets homes?</p>
+</section>
+<section id="data" class="level3">
+<h3 class="anchored" data-anchor-id="data">Data</h3>
+<p>I used data downloaded from the <a href="https://traces.cs.umass.edu/index.php/smart/smart">University of Massachusetts (UMASS) Trace Repository</a>. <a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> In particular, I used the Apartment dataset from the 2017 release of the UMASS Smart* Dataset, which is a project that aims to optimize home energy consumption. The Apartment dataset contains minute-level electricity data and local weather conditions from 114 anonymous apartments in Massachussetts collected between 2014-2016.</p>
+<p>There are 114 individual data files with electricity data corresponding to individual apartments for each year, meaning there are a total of 342 files. There are also 3 data files containing weather data for each year.</p>
+</section>
+<section id="project-approach" class="level3">
+<h3 class="anchored" data-anchor-id="project-approach">Project Approach</h3>
+<p>Before I dive right into the project, here is a brief overview of my approach: I began by loading, tidying, and exploring the data. During this phase, I aggregated the per-minute consumption data into hourly averages and randomly sampled a subset of the apartments to reduce the computational power required to perform the analysis. I also removed variables with a large amount of missing observations and performed a casewise deletion for smaller cases of missingness. Then I visually explored the remaining variables to determine whether I needed to make any specific adjustments in my models - I did find that three predictors were highly correlated (&gt; 90%), which informed my decision to reduce them into one principal component before running my models. Next, I split my clean data into training and testing datasets that were stratified on the outcome variable, split the training datasets into 5-folds for cross validation, and specified my model recipe. I then built, tuned, and compared the following model types: Linear Regression, K-Nearest Neighbor, Elastic Net Regression, Random Forest, and Gradient-Boosted Tree. I evaluated the performance of all model iterations based on root mean squared error (RMSE), finalized the workflow for the best model, and fit it to the testing dataset to determine how well it could predict energy consumption based on new data. Now let’s get into the details!</p>
+</section>
+</section>
+<section id="load-and-tidy-data" class="level2">
+<h2 class="anchored" data-anchor-id="load-and-tidy-data">Load and Tidy Data</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidymodels)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(janitor)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(here)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(purrr)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(naniar)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(corrplot)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(showtext)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">tidymodels_prefer</span>()</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># set seed to reproduce results</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2244</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co"># load fonts</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="fu">font_add_google</span>(<span class="at">name =</span> <span class="st">"Lato"</span>, <span class="at">family =</span> <span class="st">"lato"</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">showtext_auto</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Since there were a large amount of individual files that needed to be loaded, aggregated, and cleaned, I began by defining two functions:</p>
+<ol type="1">
+<li>The first function, <code>tidy_weather_data</code>, loads and aggregates data from all files that contain weather information, converts the column headers to lower snake case, and adds columns for time parameters (datetime, date, year, month, and hour) using the <code>tidyverse</code>, <code>janitor</code>, and <code>lubridate</code> packages. I decided to separate out the year, month, and hour columns to be their own predictors because I believe energy usage may vary based on them. I also filtered the dataset to only contain dates from noon on October 14, 2014 onward, as that is the first datetime for which data exists in the apartments dataset.</li>
+</ol>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># define list of weather files</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>weather_files <span class="ot">&lt;-</span> <span class="fu">list.files</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data/apartment-weather"</span>), <span class="at">full.names =</span> <span class="cn">TRUE</span>) </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># define function to process and clean weather data</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>tidy_weather_data <span class="ot">&lt;-</span> <span class="cf">function</span>(file_path) {</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  df <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(file_path) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    janitor<span class="sc">::</span><span class="fu">clean_names</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">datetime =</span> lubridate<span class="sc">::</span><span class="fu">as_datetime</span>(time, <span class="at">origin =</span> <span class="st">"1970-01-01"</span>, <span class="at">tz =</span> <span class="st">"America/New_York"</span>),  <span class="co"># Convert unix timestamp to Eastern datetime </span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">date =</span> lubridate<span class="sc">::</span><span class="fu">date</span>(datetime),</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>           <span class="at">hour =</span> lubridate<span class="sc">::</span><span class="fu">hour</span>(datetime),</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>           <span class="at">month =</span> lubridate<span class="sc">::</span><span class="fu">month</span>(datetime),</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>           <span class="at">year =</span> lubridate<span class="sc">::</span><span class="fu">year</span>(datetime)) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(datetime <span class="sc">&gt;=</span> lubridate<span class="sc">::</span><span class="fu">ymd_hms</span>(<span class="st">"2014-10-15 12:00:00"</span>)) <span class="co"># filter data to startdate of apartment data</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(df)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co"># apply function over weather files </span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>weather_data <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dfr</span>(weather_files, tidy_weather_data)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="co"># inspect result df</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(weather_data)</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(weather_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ol start="2" type="1">
+<li>The second function, <code>tidy_apartment_data</code>, loads and aggregates data from all files that contain electricity data, converts the column headers to lower snake case, and adds columns for time parameters (datetime, date, year, month, and hour) using the <code>tidyverse</code>, <code>janitor</code>, and <code>lubridate</code> packages. I also added a new column to the dataframe containing the unique apartment identification numbers, which were included in the file names. Lastly, I summarized the raw minute-level data into hourly average power use in kiloWatts to reduce the computational power required.</li>
+</ol>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># define list of apartment files</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>apt_files <span class="ot">&lt;-</span> <span class="fu">list.files</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data/apartment"</span>), <span class="at">pattern =</span> <span class="st">".csv"</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>, <span class="at">recursive =</span> <span class="cn">TRUE</span>) </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># define function to process and clean apartment data</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>tidy_apartment_data <span class="ot">&lt;-</span> <span class="cf">function</span>(file_path) {</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  df <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(file_path, <span class="at">col_names =</span> <span class="fu">c</span>(<span class="st">"datetime"</span>, <span class="st">"power_kw"</span>), <span class="at">col_types =</span> <span class="fu">cols</span>(<span class="at">datetime =</span> <span class="fu">col_datetime</span>(), <span class="at">power_kw =</span> <span class="fu">col_double</span>())) <span class="sc">%&gt;%</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    janitor<span class="sc">::</span><span class="fu">clean_names</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">apt_id =</span> <span class="fu">as.numeric</span>(stringr<span class="sc">::</span><span class="fu">str_extract</span>(<span class="fu">basename</span>(file_path), <span class="st">"Apt(</span><span class="sc">\\</span><span class="st">d+)_</span><span class="sc">\\</span><span class="st">d{4}"</span>) <span class="sc">%&gt;%</span> stringr<span class="sc">::</span><span class="fu">str_extract</span>(<span class="st">"(?&lt;=Apt)</span><span class="sc">\\</span><span class="st">d+"</span>)),</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>           <span class="at">datetime =</span> lubridate<span class="sc">::</span><span class="fu">ymd_hms</span>(datetime),</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">date =</span> lubridate<span class="sc">::</span><span class="fu">date</span>(datetime),</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>           <span class="at">hour =</span> lubridate<span class="sc">::</span><span class="fu">hour</span>(datetime),</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>           <span class="at">month =</span> lubridate<span class="sc">::</span><span class="fu">month</span>(datetime),</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>           <span class="at">year =</span> lubridate<span class="sc">::</span><span class="fu">year</span>(datetime)) <span class="sc">%&gt;%</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(date, hour, apt_id) <span class="sc">%&gt;%</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">hourly_average_power_kw =</span> <span class="fu">as.numeric</span>(<span class="fu">mean</span>(<span class="fu">as.numeric</span>(power_kw), <span class="at">na.rm =</span> <span class="cn">TRUE</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>()</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(df)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co"># apply function over all apartment files </span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>apt_data <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dfr</span>(apt_files, tidy_apartment_data )</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="co"># inspect result df</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(apt_data)</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(apt_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>After loading, aggregating, and cleaning all of the data (good job to my computer), I combined the weather dataset with the apartments dataset by joining them based on the common date and hour columns. I also defined the month, year, and apartment IDs as factors to make them easier to plot later on. Lastly, I randomly sampled 50 out of the 114 apartments in an effort to decrease the computational power and run time required for my machine learning models.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># define random apartment ids to use for models</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>apt_sample <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">114</span>, <span class="dv">50</span>, <span class="at">replace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># combine weather and apartment data</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>smart_df <span class="ot">&lt;-</span> apt_data <span class="sc">%&gt;%</span> </span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">full_join</span>(weather_data, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"date"</span>, <span class="st">"hour"</span>), <span class="at">relationship =</span> <span class="st">"many-to-many"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_at</span>(<span class="fu">vars</span>(hour,hourly_average_power_kw, temperature, humidity, visibility, apparent_temperature, pressure, wind_speed, cloud_cover, wind_bearing, precip_intensity, dew_point, precip_probability), as.numeric) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_at</span>(<span class="fu">vars</span>(month, year, apt_id), as.factor) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(apt_id <span class="sc">%in%</span> apt_sample)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co"># save combined df</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(smart_df, <span class="at">file =</span> <span class="st">"data/inter_data/smart_df.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="exploratory-data-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="exploratory-data-analysis">Exploratory Data Analysis</h2>
+<p>Once all my data was in one dataframe, my first real step was to figure out how much of it was missing. Here I used the <code>vis_miss()</code> function from the <code>naniar</code> package to visualize any missing values.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># load combined df</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2024-03-22-machine-learning-weather-energy/data/inter_data/smart_df.csv"</span>))</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># visualize missing data</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>smart_df <span class="sc">%&gt;%</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  naniar<span class="sc">::</span><span class="fu">vis_miss</span>(<span class="at">warn_large_data =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"lato"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/visualize nas-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Surprisingly, the dataset was near-complete! Only 1.2% of it was missing (this might be a new record for me). Nearly all of the missing values were from the <code>cloud_cover</code> column. I wonder why this variable was missing so many observations in an otherwise comprehensive dataset - maybe cloud cover relied on manual human measurement while the other variables were automatically measured by instruments.</p>
+<p>Since the <code>cloud_cover</code> variable itself was missing 13% of observations and was not one of the most impactful predictor variables, I decided to drop the entire variable from the dataset. This way, I avoided losing 13% of the entire dataset like I would if I performed a complete case/ pairwise deletion.</p>
+<p>The rest of the variables in the dataset were missing between 0-1% of their values. Since this is such a small proportion, I decided to performa complete case/ pairwise deletion across the entire dataset. If the proportion was higher, I would have imputed the missing values.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># remove variables with missing data and non-useful data</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>smart_mod <span class="ot">&lt;-</span> smart_df <span class="sc">%&gt;%</span> </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>cloud_cover) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Once all the missing values were taken care of, I took a peek at the data through descriptive and summary statistics.</p>
+<p>My final dataframe had 20 variables and 953,578 observations.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># explore data  </span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>smart_mod <span class="sc">%&gt;%</span> <span class="fu">dim</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 953578     20</code></pre>
+</div>
+</div>
+<p>The column names of my dataframe were:</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>smart_mod <span class="sc">%&gt;%</span> <span class="fu">names</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "date"                    "hour"                   
+ [3] "apt_id"                  "hourly_average_power_kw"
+ [5] "temperature"             "icon"                   
+ [7] "humidity"                "visibility"             
+ [9] "summary"                 "apparent_temperature"   
+[11] "pressure"                "wind_speed"             
+[13] "time"                    "wind_bearing"           
+[15] "precip_intensity"        "dew_point"              
+[17] "precip_probability"      "datetime"               
+[19] "month"                   "year"                   </code></pre>
+</div>
+</div>
+<p>It looked like the data type for all the variables are appropriate. Most of the variables were numeric while the <code>summary</code> and <code>icon</code> variables were categorical. The <code>apartment ID</code>, <code>month</code>, and <code>year</code> were all factors because I defined them to be factors above. Lastly, the <code>datetime</code> and <code>date</code> columns are POSIXct and Date objects, respectively.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>smart_mod <span class="sc">%&gt;%</span> <span class="fu">str</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>tibble [953,578 × 20] (S3: tbl_df/tbl/data.frame)
+ $ date                   : Date[1:953578], format: "2014-10-15" "2014-10-15" ...
+ $ hour                   : num [1:953578] 12 13 14 15 16 17 18 19 20 21 ...
+ $ apt_id                 : Factor w/ 114 levels "1","2","3","4",..: 1 1 1 1 1 1 1 1 1 1 ...
+ $ hourly_average_power_kw: num [1:953578] 0 0 0 0 0 0 0 0 0 0 ...
+ $ temperature            : num [1:953578] 74.2 75.3 75.9 75.9 74.7 ...
+ $ icon                   : chr [1:953578] "partly-cloudy-day" "partly-cloudy-day" "cloudy" "clear-day" ...
+ $ humidity               : num [1:953578] 0.73 0.71 0.68 0.67 0.7 0.72 0.76 0.79 0.81 0.83 ...
+ $ visibility             : num [1:953578] 9.56 9.29 10 10 9.79 10 9.95 9.95 9.91 8.86 ...
+ $ summary                : chr [1:953578] "Partly Cloudy" "Partly Cloudy" "Overcast" "Clear" ...
+ $ apparent_temperature   : num [1:953578] 74.2 75.3 75.9 75.9 74.7 ...
+ $ pressure               : num [1:953578] 1019 1018 1017 1017 1016 ...
+ $ wind_speed             : num [1:953578] 10.07 10.19 10.45 11.05 9.19 ...
+ $ time                   : num [1:953578] 1.41e+09 1.41e+09 1.41e+09 1.41e+09 1.41e+09 ...
+ $ wind_bearing           : num [1:953578] 183 178 179 174 178 162 152 154 147 146 ...
+ $ precip_intensity       : num [1:953578] 0.0023 0.0011 0.0022 0 0.0011 0 0 0 0 0.001 ...
+ $ dew_point              : num [1:953578] 65 65.2 64.8 64.2 64.3 ...
+ $ precip_probability     : num [1:953578] 0.06 0.01 0.06 0 0.01 0 0 0 0 0.01 ...
+ $ datetime               : POSIXct[1:953578], format: "2014-10-15 12:00:00" "2014-10-15 13:00:00" ...
+ $ month                  : Factor w/ 12 levels "1","2","3","4",..: 10 10 10 10 10 10 10 10 10 10 ...
+ $ year                   : Factor w/ 3 levels "2014","2015",..: 1 1 1 1 1 1 1 1 1 1 ...</code></pre>
+</div>
+</div>
+<p>The summary statistics for all the variables are shown in the table below:</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>smart_mod <span class="sc">%&gt;%</span> <span class="fu">summary</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(<span class="at">caption =</span> <span class="st">"Summary Statistics for all Variables in the Smart* Dataset"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">full_width =</span> F, <span class="at">font =</span> <span class="st">"lato"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scroll_box</span>(<span class="at">width =</span> <span class="st">"100%"</span>, <span class="at">height =</span> <span class="st">"200px"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:200px; overflow-x: scroll; width:100%; ">
+<table class="table table-sm table-striped small" data-quarto-postprocess="true">
+<caption>Summary Statistics for all Variables in the Smart* Dataset</caption>
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;"></th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">date</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">hour</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">apt_id</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">hourly_average_power_kw</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">temperature</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">icon</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">humidity</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">visibility</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">summary</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">apparent_temperature</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">pressure</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">wind_speed</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">time</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">wind_bearing</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">precip_intensity</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">dew_point</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">precip_probability</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">datetime</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">month</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">year</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Min. :2014-10-15</td>
+<td style="text-align: left;">Min. : 0.0</td>
+<td style="text-align: left;">92 : 19379</td>
+<td style="text-align: left;">Min. : 0.0000</td>
+<td style="text-align: left;">Min. :-13.05</td>
+<td style="text-align: left;">Length:953578</td>
+<td style="text-align: left;">Min. :0.130</td>
+<td style="text-align: left;">Min. : 0.290</td>
+<td style="text-align: left;">Length:953578</td>
+<td style="text-align: left;">Min. :-32.99</td>
+<td style="text-align: left;">Min. : 986.1</td>
+<td style="text-align: left;">Min. : 0.020</td>
+<td style="text-align: left;">Min. :1.413e+09</td>
+<td style="text-align: left;">Min. : 0.0</td>
+<td style="text-align: left;">Min. :0.000000</td>
+<td style="text-align: left;">Min. :-27.69</td>
+<td style="text-align: left;">Min. :0.00000</td>
+<td style="text-align: left;">Min. :2014-10-15 08:00:00.00</td>
+<td style="text-align: left;">11 :108150</td>
+<td style="text-align: left;">2014: 93127</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">1st Qu.:2015-05-01</td>
+<td style="text-align: left;">1st Qu.: 6.0</td>
+<td style="text-align: left;">36 : 19068</td>
+<td style="text-align: left;">1st Qu.: 0.2112</td>
+<td style="text-align: left;">1st Qu.: 34.49</td>
+<td style="text-align: left;">Class :character</td>
+<td style="text-align: left;">1st Qu.:0.530</td>
+<td style="text-align: left;">1st Qu.: 9.190</td>
+<td style="text-align: left;">Class :character</td>
+<td style="text-align: left;">1st Qu.: 29.49</td>
+<td style="text-align: left;">1st Qu.:1012.0</td>
+<td style="text-align: left;">1st Qu.: 3.630</td>
+<td style="text-align: left;">1st Qu.:1.430e+09</td>
+<td style="text-align: left;">1st Qu.:158.0</td>
+<td style="text-align: left;">1st Qu.:0.000000</td>
+<td style="text-align: left;">1st Qu.: 24.25</td>
+<td style="text-align: left;">1st Qu.:0.00000</td>
+<td style="text-align: left;">1st Qu.:2015-05-01 02:00:00.00</td>
+<td style="text-align: left;">10 : 94277</td>
+<td style="text-align: left;">2015:439100</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Median :2015-11-15</td>
+<td style="text-align: left;">Median :12.0</td>
+<td style="text-align: left;">38 : 19068</td>
+<td style="text-align: left;">Median : 0.9015</td>
+<td style="text-align: left;">Median : 48.62</td>
+<td style="text-align: left;">Mode :character</td>
+<td style="text-align: left;">Median :0.700</td>
+<td style="text-align: left;">Median :10.000</td>
+<td style="text-align: left;">Mode :character</td>
+<td style="text-align: left;">Median : 46.43</td>
+<td style="text-align: left;">Median :1017.2</td>
+<td style="text-align: left;">Median : 5.860</td>
+<td style="text-align: left;">Median :1.448e+09</td>
+<td style="text-align: left;">Median :220.0</td>
+<td style="text-align: left;">Median :0.000000</td>
+<td style="text-align: left;">Median : 37.82</td>
+<td style="text-align: left;">Median :0.00000</td>
+<td style="text-align: left;">Median :2015-11-15 18:00:00.00</td>
+<td style="text-align: left;">12 : 92501</td>
+<td style="text-align: left;">2016:421351</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Mean :2015-11-14</td>
+<td style="text-align: left;">Mean :11.5</td>
+<td style="text-align: left;">40 : 19068</td>
+<td style="text-align: left;">Mean : 1.1568</td>
+<td style="text-align: left;">Mean : 48.90</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">Mean :0.676</td>
+<td style="text-align: left;">Mean : 9.103</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">Mean : 46.20</td>
+<td style="text-align: left;">Mean :1017.2</td>
+<td style="text-align: left;">Mean : 6.539</td>
+<td style="text-align: left;">Mean :1.448e+09</td>
+<td style="text-align: left;">Mean :207.4</td>
+<td style="text-align: left;">Mean :0.003222</td>
+<td style="text-align: left;">Mean : 37.48</td>
+<td style="text-align: left;">Mean :0.06097</td>
+<td style="text-align: left;">Mean :2015-11-15 09:39:56.80</td>
+<td style="text-align: left;">1 : 76800</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">3rd Qu.:2016-05-31</td>
+<td style="text-align: left;">3rd Qu.:17.0</td>
+<td style="text-align: left;">53 : 19068</td>
+<td style="text-align: left;">3rd Qu.: 1.7686</td>
+<td style="text-align: left;">3rd Qu.: 64.76</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">3rd Qu.:0.850</td>
+<td style="text-align: left;">3rd Qu.:10.000</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">3rd Qu.: 64.76</td>
+<td style="text-align: left;">3rd Qu.:1022.3</td>
+<td style="text-align: left;">3rd Qu.: 8.650</td>
+<td style="text-align: left;">3rd Qu.:1.465e+09</td>
+<td style="text-align: left;">3rd Qu.:294.0</td>
+<td style="text-align: left;">3rd Qu.:0.000000</td>
+<td style="text-align: left;">3rd Qu.: 54.31</td>
+<td style="text-align: left;">3rd Qu.:0.00000</td>
+<td style="text-align: left;">3rd Qu.:2016-05-31 12:00:00.00</td>
+<td style="text-align: left;">5 : 74400</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Max. :2016-12-28</td>
+<td style="text-align: left;">Max. :23.0</td>
+<td style="text-align: left;">109 : 19068</td>
+<td style="text-align: left;">Max. :79.1174</td>
+<td style="text-align: left;">Max. : 93.78</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">Max. :0.980</td>
+<td style="text-align: left;">Max. :10.000</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">Max. : 98.45</td>
+<td style="text-align: left;">Max. :1044.5</td>
+<td style="text-align: left;">Max. :24.940</td>
+<td style="text-align: left;">Max. :1.483e+09</td>
+<td style="text-align: left;">Max. :359.0</td>
+<td style="text-align: left;">Max. :0.426900</td>
+<td style="text-align: left;">Max. : 75.29</td>
+<td style="text-align: left;">Max. :0.90000</td>
+<td style="text-align: left;">Max. :2016-12-28 22:00:00.00</td>
+<td style="text-align: left;">7 : 74400</td>
+<td style="text-align: left;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">(Other):838859</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">(Other):433050</td>
+<td style="text-align: left;">NA</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+</div>
+</div>
+<p>Lastly, here’s a look at the first few rows of the data in case you want to get a feel for it:</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>smart_mod <span class="sc">%&gt;%</span> <span class="fu">head</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(<span class="at">caption =</span> <span class="st">"First 6 Rows of the Smart* Dataset"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">full_width =</span> F, <span class="at">font =</span> <span class="st">"lato"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scroll_box</span>(<span class="at">width =</span> <span class="st">"100%"</span>, <span class="at">height =</span> <span class="st">"200px"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:200px; overflow-x: scroll; width:100%; ">
+<table class="table table-sm table-striped small" data-quarto-postprocess="true">
+<caption>First 6 Rows of the Smart* Dataset</caption>
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">date</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">hour</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">apt_id</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">hourly_average_power_kw</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">temperature</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">icon</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">humidity</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">visibility</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">summary</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">apparent_temperature</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">pressure</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">wind_speed</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">time</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">wind_bearing</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">precip_intensity</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">dew_point</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">precip_probability</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">datetime</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">month</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">year</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">2014-10-15</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">74.20</td>
+<td style="text-align: left;">partly-cloudy-day</td>
+<td style="text-align: right;">0.73</td>
+<td style="text-align: right;">9.56</td>
+<td style="text-align: left;">Partly Cloudy</td>
+<td style="text-align: right;">74.20</td>
+<td style="text-align: right;">1018.98</td>
+<td style="text-align: right;">10.07</td>
+<td style="text-align: right;">1413388800</td>
+<td style="text-align: right;">183</td>
+<td style="text-align: right;">0.0023</td>
+<td style="text-align: right;">65.00</td>
+<td style="text-align: right;">0.06</td>
+<td style="text-align: left;">2014-10-15 12:00:00</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">2014</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2014-10-15</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">75.32</td>
+<td style="text-align: left;">partly-cloudy-day</td>
+<td style="text-align: right;">0.71</td>
+<td style="text-align: right;">9.29</td>
+<td style="text-align: left;">Partly Cloudy</td>
+<td style="text-align: right;">75.32</td>
+<td style="text-align: right;">1017.95</td>
+<td style="text-align: right;">10.19</td>
+<td style="text-align: right;">1413392400</td>
+<td style="text-align: right;">178</td>
+<td style="text-align: right;">0.0011</td>
+<td style="text-align: right;">65.21</td>
+<td style="text-align: right;">0.01</td>
+<td style="text-align: left;">2014-10-15 13:00:00</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">2014</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2014-10-15</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">75.91</td>
+<td style="text-align: left;">cloudy</td>
+<td style="text-align: right;">0.68</td>
+<td style="text-align: right;">10.00</td>
+<td style="text-align: left;">Overcast</td>
+<td style="text-align: right;">75.91</td>
+<td style="text-align: right;">1017.11</td>
+<td style="text-align: right;">10.45</td>
+<td style="text-align: right;">1413396000</td>
+<td style="text-align: right;">179</td>
+<td style="text-align: right;">0.0022</td>
+<td style="text-align: right;">64.76</td>
+<td style="text-align: right;">0.06</td>
+<td style="text-align: left;">2014-10-15 14:00:00</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">2014</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2014-10-15</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">75.86</td>
+<td style="text-align: left;">clear-day</td>
+<td style="text-align: right;">0.67</td>
+<td style="text-align: right;">10.00</td>
+<td style="text-align: left;">Clear</td>
+<td style="text-align: right;">75.86</td>
+<td style="text-align: right;">1016.71</td>
+<td style="text-align: right;">11.05</td>
+<td style="text-align: right;">1413399600</td>
+<td style="text-align: right;">174</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">64.21</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: left;">2014-10-15 15:00:00</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">2014</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2014-10-15</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">74.74</td>
+<td style="text-align: left;">clear-day</td>
+<td style="text-align: right;">0.70</td>
+<td style="text-align: right;">9.79</td>
+<td style="text-align: left;">Clear</td>
+<td style="text-align: right;">74.74</td>
+<td style="text-align: right;">1016.49</td>
+<td style="text-align: right;">9.19</td>
+<td style="text-align: right;">1413403200</td>
+<td style="text-align: right;">178</td>
+<td style="text-align: right;">0.0011</td>
+<td style="text-align: right;">64.34</td>
+<td style="text-align: right;">0.01</td>
+<td style="text-align: left;">2014-10-15 16:00:00</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">2014</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2014-10-15</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">74.14</td>
+<td style="text-align: left;">partly-cloudy-day</td>
+<td style="text-align: right;">0.72</td>
+<td style="text-align: right;">10.00</td>
+<td style="text-align: left;">Partly Cloudy</td>
+<td style="text-align: right;">74.14</td>
+<td style="text-align: right;">1016.22</td>
+<td style="text-align: right;">9.86</td>
+<td style="text-align: right;">1413406800</td>
+<td style="text-align: right;">162</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">64.48</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: left;">2014-10-15 17:00:00</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">2014</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+</div>
+</div>
+</section>
+<section id="visual-exploratory-data-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="visual-exploratory-data-analysis">Visual Exploratory Data Analysis</h2>
+<p>Next, I began my favorite type of exploratory analysis - visualization!</p>
+<section id="correlation-plot" class="level3">
+<h3 class="anchored" data-anchor-id="correlation-plot">Correlation Plot</h3>
+<p>First off, I explored how correlated all of the numeric variables were by using the <code>corrplot()</code> function from the <code>corrplot</code> package to visualize a correlation matrix. It showed me that <code>temperature</code>, <code>apparent_temperature</code>, and <code>dew point</code> were highly positively correlated, which makes sense since they are physically related; since they were so highly correlated (&gt; 90%), I decide to use a principal components analysis (PCA) in my model recipe below to collapse them into 1 feature instead of 3. Interestingly, these three variables were negatively correlated with <code>hourly_average_power_kw</code>, which is the outcome variable of interest. Another interesting finding is that <code>visibility</code> was negatively correlated to <code>humidity</code>, <code>precipitation intensity</code>, and <code>precipitation probability</code> - this makes sense since it is hard to see far while it’s raining. The other correlations were also logical since weather variables are typically all related.</p>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># correlation plot of all variables</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>smart_mod <span class="sc">%&gt;%</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">where</span>(is.numeric)) <span class="sc">%&gt;%</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cor</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">corrplot</span>(<span class="at">method =</span> <span class="st">'number'</span>, <span class="at">order =</span> <span class="st">'FPC'</span>, <span class="at">type =</span> <span class="st">'lower'</span>, <span class="at">family =</span> <span class="st">"lato"</span>, <span class="at">number.cex=</span><span class="fl">0.6</span>, <span class="at">bg =</span> <span class="st">"grey80"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/correlation plot-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="power-usage-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="power-usage-distribution">Power Usage Distribution</h3>
+<p>Next, I explored the distribution of <code>hourly_average_power_kw</code>, which is the outcome variable of interest. The outcome variable was highly positively skewed, as the vast majority of observations (order of <span class="math inline">\(10^5\)</span> - <span class="math inline">\(10^6\)</span>) for each bin were between 0 - 10 kiloWatts. There were only a handful of observations (order of <span class="math inline">\(10^1\)</span>) for each bin between 15 - 232 kiloWatts.</p>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># histogram of energy usage</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> smart_mod, <span class="fu">aes</span>(<span class="at">x =</span> hourly_average_power_kw))<span class="sc">+</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">fill =</span> <span class="st">"#DAA49A"</span>, <span class="at">col =</span> <span class="st">"#875053"</span>, <span class="at">bins =</span> <span class="dv">150</span>)<span class="sc">+</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Power Usage (kW)"</span>, <span class="at">y =</span> <span class="st">"Count"</span>)<span class="sc">+</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()<span class="sc">+</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"lato"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/power histogram-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="power-usage-by-month" class="level3">
+<h3 class="anchored" data-anchor-id="power-usage-by-month">Power Usage by Month</h3>
+<p>I visualized the relationship between power usage and month by making a box-and-whisket plot. As expected, power usage is lowest during the warm months (June - September) and highest during the cold months (November - February); this makes sense since most people crank up the heat in the winter months to stay warm. Interestingly, there were quite a few outliers for all of the months, which could mean some apartments use more energy in general.</p>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># boxplot of energy usage against month</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> smart_mod, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(month, <span class="at">labels =</span> month.name), <span class="at">y =</span> hourly_average_power_kw, <span class="at">group =</span> month))<span class="sc">+</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">fill =</span> <span class="st">"#DAA49A"</span>, <span class="at">col =</span> <span class="st">"#875053"</span>)<span class="sc">+</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">12</span>))<span class="sc">+</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="co">#geom_jitter(alpha = 0.4, col = "#DAA49A")+</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Month"</span>, <span class="at">y =</span> <span class="st">"Power (kW)"</span>)<span class="sc">+</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()<span class="sc">+</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"lato"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/monthly boxplot-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="temperature-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="temperature-distribution">Temperature Distribution</h3>
+<p>Next, I explored the distribution of <code>temperature</code>, which I expect would have a significant impact on energy use. Temprature had a normal distribution with a slight left tail, indicating a small negative skew.</p>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># histogram of temperature</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> smart_mod, <span class="fu">aes</span>(<span class="at">x =</span> temperature))<span class="sc">+</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># geom_histogram(aes(y = ..density..), bins = 50, fill = "#DAA49A", col = "#875053")+</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># geom_density(linewidth = 1.5)+</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">50</span>, <span class="at">fill =</span> <span class="st">"#DAA49A"</span>, <span class="at">col =</span> <span class="st">"#875053"</span>)<span class="sc">+</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Temperature (deg F)"</span>, <span class="at">y =</span> <span class="st">"Count"</span>)<span class="sc">+</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()<span class="sc">+</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"lato"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/temp histogram-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="model-set-up" class="level2">
+<h2 class="anchored" data-anchor-id="model-set-up">Model Set-Up</h2>
+<p>Next, I prepared my data for the machine learning models. Here, I randomly split the data into training and testing datasets, split the training dataset into 5 folds for k-fold cross validation, and specified a model recipe.</p>
+<section id="split-training-and-testing-data" class="level3">
+<h3 class="anchored" data-anchor-id="split-training-and-testing-data">Split Training and Testing Data</h3>
+<p>First off, I split the full dataset into training and testing datasets. Like the names imply, the training dataset will be used to train the models while the testing dataset will be used to test the predictive power of the models at the very end. I split the data using the <code>initial_split()</code> function from the <code>rsample</code> package. The split is stratified on the outcome variable, <code>hourly_average_power_kw</code>, to ensure that both the training and the testing datasets have roughly the same distribution of <code>hourly_average_power_kw</code>. I split the full dataset so that 3/4 of it becomes the training dataset and the remaining 1/4 becomes the testing dataset. This was to ensure there is a good amount of data for training while still retaining enough for substantial testing.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># split data</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>smart_split <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">initial_split</span>(smart_mod, </span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">prop =</span> <span class="fl">0.75</span>,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">strata =</span> hourly_average_power_kw)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="co"># assign splits to train and test objects</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>smart_train <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">training</span>(smart_split)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>smart_test <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">testing</span>(smart_split)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="k-fold-cross-validation" class="level3">
+<h3 class="anchored" data-anchor-id="k-fold-cross-validation">K-Fold Cross Validation</h3>
+<p>I also performed a k-fold cross validation on my entire training set with k = 5. This splits the entire training set into 5 folds that each consist of a mini-training, or analysis set, and a mini-testing, or assessment set. Each of my models will be trained on the analysis sets and tested on the assessment sets of each fold and the mean performance metric across all folds will be reported. I used the <code>vfold</code> function from <code>rsample</code> to split the training dataset into 5 folds and stratified on the outcome variable once again to ensure that each subset of the data has the same distribution of <code>hourly_average_power_kw</code>.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># split data for k-fold CV</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>smart_folds <span class="ot">&lt;-</span> rsample<span class="sc">::</span><span class="fu">vfold_cv</span>(smart_train, <span class="at">v =</span> <span class="dv">5</span>, <span class="at">strata =</span> hourly_average_power_kw)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="build-recipe" class="level3">
+<h3 class="anchored" data-anchor-id="build-recipe">Build Recipe</h3>
+<p>Then I specified a recipe for the models to use. I used the <code>recipes</code> package to do things like define the model recipe, dummy code the categorical variables, center all predictors, scale all predictors, and reduce the dimensions of those highly correlated predictors I noticed during the EDA (<code>temperature</code>, <code>apparent_temperature</code>, and <code>dew_point</code>).</p>
+<p>My recipe tells my models to predict <code>hourly_average_power_kw</code> as a function of <code>temperature</code> + <code>humidity</code> + <code>visibility</code> + <code>summary</code> + <code>apparent_temperature</code> + <code>pressure</code> + <code>wind_speed</code> + <code>wind_bearing</code> + <code>precip_intensity</code> + <code>dew_point</code> + <code>precip_probability</code> + <code>year</code> + <code>month</code> + <code>hour</code> + <code>time</code>. The results from the pre-processing steps I specified are shown below.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># define recipe</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>smart_recipe <span class="ot">&lt;-</span> recipes<span class="sc">::</span><span class="fu">recipe</span>(hourly_average_power_kw <span class="sc">~</span> temperature <span class="sc">+</span> humidity <span class="sc">+</span> visibility <span class="sc">+</span> summary <span class="sc">+</span> apparent_temperature <span class="sc">+</span> pressure <span class="sc">+</span> wind_speed <span class="sc">+</span> wind_bearing <span class="sc">+</span> precip_intensity <span class="sc">+</span> dew_point <span class="sc">+</span> precip_probability <span class="sc">+</span> year <span class="sc">+</span> month <span class="sc">+</span> hour <span class="sc">+</span> time, <span class="at">data =</span> smart_train) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  recipes<span class="sc">::</span><span class="fu">step_dummy</span>(<span class="fu">all_nominal_predictors</span>()) <span class="sc">%&gt;%</span> <span class="co"># dummy code categorical variables</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  recipes<span class="sc">::</span><span class="fu">step_normalize</span>(<span class="fu">all_numeric_predictors</span>(), <span class="sc">-</span><span class="fu">all_nominal_predictors</span>()) <span class="sc">%&gt;%</span> <span class="co"># center and scale numeric predictors only</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  recipes<span class="sc">::</span><span class="fu">step_pca</span>(<span class="fu">c</span>(<span class="st">"temperature"</span>, <span class="st">"apparent_temperature"</span>, <span class="st">"dew_point"</span>), <span class="at">num_comp =</span> <span class="dv">1</span>) <span class="co"># convert highly correlated variables (&gt;90) into 1 principal component</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="co">#apply/view recipe</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>smart_recipe <span class="sc">%&gt;%</span> </span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>  recipes<span class="sc">::</span><span class="fu">prep</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>  recipes<span class="sc">::</span><span class="fu">bake</span>(<span class="at">new_data =</span> smart_train) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">full_width =</span> F, <span class="at">font =</span> <span class="st">"lato"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scroll_box</span>(<span class="at">width =</span> <span class="st">"100%"</span>, <span class="at">height =</span> <span class="st">"200px"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:200px; overflow-x: scroll; width:100%; ">
+<table class="table table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">humidity</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">visibility</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">pressure</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">wind_speed</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">wind_bearing</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">precip_intensity</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">precip_probability</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">hour</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">time</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">hourly_average_power_kw</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">summary_Breezy.and.Foggy</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">summary_Breezy.and.Mostly.Cloudy</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">summary_Breezy.and.Overcast</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">summary_Breezy.and.Partly.Cloudy</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">summary_Clear</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">summary_Drizzle</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">summary_Drizzle.and.Breezy</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">summary_Dry</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">summary_Flurries</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">summary_Foggy</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">summary_Heavy.Rain</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">summary_Heavy.Snow</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">summary_Humid.and.Overcast</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">summary_Humid.and.Partly.Cloudy</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">summary_Light.Rain</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">summary_Light.Rain.and.Breezy</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">summary_Light.Snow</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">summary_Mostly.Cloudy</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">summary_Overcast</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">summary_Partly.Cloudy</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">summary_Rain</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">summary_Rain.and.Breezy</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">summary_Snow</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">year_X2015</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">year_X2016</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">month_X2</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">month_X3</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">month_X4</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">month_X5</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">month_X6</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">month_X7</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">month_X8</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">month_X9</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">month_X10</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">month_X11</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">month_X12</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">PC1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0.2820793</td>
+<td style="text-align: right;">0.2571194</td>
+<td style="text-align: right;">0.2295259</td>
+<td style="text-align: right;">0.9074681</td>
+<td style="text-align: right;">-0.2347835</td>
+<td style="text-align: right;">-0.0560576</td>
+<td style="text-align: right;">-0.0067788</td>
+<td style="text-align: right;">0.0723027</td>
+<td style="text-align: right;">-1.727829</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">-0.0101725</td>
+<td style="text-align: right;">-0.007095</td>
+<td style="text-align: right;">-0.007095</td>
+<td style="text-align: right;">-0.0378107</td>
+<td style="text-align: right;">-1.727704</td>
+<td style="text-align: right;">-0.1460816</td>
+<td style="text-align: right;">-0.0073847</td>
+<td style="text-align: right;">-0.0073847</td>
+<td style="text-align: right;">-0.0608575</td>
+<td style="text-align: right;">-0.0465443</td>
+<td style="text-align: right;">-0.029337</td>
+<td style="text-align: right;">-0.0203483</td>
+<td style="text-align: right;">-0.0074788</td>
+<td style="text-align: right;">-0.0068951</td>
+<td style="text-align: right;">-0.2423889</td>
+<td style="text-align: right;">-0.0126264</td>
+<td style="text-align: right;">-0.1116211</td>
+<td style="text-align: right;">-0.0788855</td>
+<td style="text-align: right;">-0.1086493</td>
+<td style="text-align: right;">2.7684555</td>
+<td style="text-align: right;">-0.1128537</td>
+<td style="text-align: right;">-0.0123463</td>
+<td style="text-align: right;">-0.0618335</td>
+<td style="text-align: right;">-0.9242423</td>
+<td style="text-align: right;">-0.8889373</td>
+<td style="text-align: right;">-0.278143</td>
+<td style="text-align: right;">-0.2909624</td>
+<td style="text-align: right;">-0.2860174</td>
+<td style="text-align: right;">-0.2909087</td>
+<td style="text-align: right;">-0.2860689</td>
+<td style="text-align: right;">-0.2906768</td>
+<td style="text-align: right;">-0.2912252</td>
+<td style="text-align: right;">-0.2853847</td>
+<td style="text-align: right;">3.018419</td>
+<td style="text-align: right;">-0.3573269</td>
+<td style="text-align: right;">-0.3275356</td>
+<td style="text-align: right;">-2.267436</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.1779755</td>
+<td style="text-align: right;">0.1048700</td>
+<td style="text-align: right;">0.0987204</td>
+<td style="text-align: right;">0.9383314</td>
+<td style="text-align: right;">-0.2826580</td>
+<td style="text-align: right;">-0.1275158</td>
+<td style="text-align: right;">-0.2912672</td>
+<td style="text-align: right;">0.2167757</td>
+<td style="text-align: right;">-1.727647</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">-0.0101725</td>
+<td style="text-align: right;">-0.007095</td>
+<td style="text-align: right;">-0.007095</td>
+<td style="text-align: right;">-0.0378107</td>
+<td style="text-align: right;">-1.727704</td>
+<td style="text-align: right;">-0.1460816</td>
+<td style="text-align: right;">-0.0073847</td>
+<td style="text-align: right;">-0.0073847</td>
+<td style="text-align: right;">-0.0608575</td>
+<td style="text-align: right;">-0.0465443</td>
+<td style="text-align: right;">-0.029337</td>
+<td style="text-align: right;">-0.0203483</td>
+<td style="text-align: right;">-0.0074788</td>
+<td style="text-align: right;">-0.0068951</td>
+<td style="text-align: right;">-0.2423889</td>
+<td style="text-align: right;">-0.0126264</td>
+<td style="text-align: right;">-0.1116211</td>
+<td style="text-align: right;">-0.0788855</td>
+<td style="text-align: right;">-0.1086493</td>
+<td style="text-align: right;">2.7684555</td>
+<td style="text-align: right;">-0.1128537</td>
+<td style="text-align: right;">-0.0123463</td>
+<td style="text-align: right;">-0.0618335</td>
+<td style="text-align: right;">-0.9242423</td>
+<td style="text-align: right;">-0.8889373</td>
+<td style="text-align: right;">-0.278143</td>
+<td style="text-align: right;">-0.2909624</td>
+<td style="text-align: right;">-0.2860174</td>
+<td style="text-align: right;">-0.2909087</td>
+<td style="text-align: right;">-0.2860689</td>
+<td style="text-align: right;">-0.2906768</td>
+<td style="text-align: right;">-0.2912252</td>
+<td style="text-align: right;">-0.2853847</td>
+<td style="text-align: right;">3.018419</td>
+<td style="text-align: right;">-0.3573269</td>
+<td style="text-align: right;">-0.3275356</td>
+<td style="text-align: right;">-2.335619</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.0218198</td>
+<td style="text-align: right;">0.5052295</td>
+<td style="text-align: right;">-0.0079559</td>
+<td style="text-align: right;">1.0052019</td>
+<td style="text-align: right;">-0.2730831</td>
+<td style="text-align: right;">-0.0620124</td>
+<td style="text-align: right;">-0.0067788</td>
+<td style="text-align: right;">0.3612487</td>
+<td style="text-align: right;">-1.727465</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">-0.0101725</td>
+<td style="text-align: right;">-0.007095</td>
+<td style="text-align: right;">-0.007095</td>
+<td style="text-align: right;">-0.0378107</td>
+<td style="text-align: right;">-1.727704</td>
+<td style="text-align: right;">-0.1460816</td>
+<td style="text-align: right;">-0.0073847</td>
+<td style="text-align: right;">-0.0073847</td>
+<td style="text-align: right;">-0.0608575</td>
+<td style="text-align: right;">-0.0465443</td>
+<td style="text-align: right;">-0.029337</td>
+<td style="text-align: right;">-0.0203483</td>
+<td style="text-align: right;">-0.0074788</td>
+<td style="text-align: right;">-0.0068951</td>
+<td style="text-align: right;">-0.2423889</td>
+<td style="text-align: right;">-0.0126264</td>
+<td style="text-align: right;">-0.1116211</td>
+<td style="text-align: right;">-0.0788855</td>
+<td style="text-align: right;">9.2039128</td>
+<td style="text-align: right;">-0.3612117</td>
+<td style="text-align: right;">-0.1128537</td>
+<td style="text-align: right;">-0.0123463</td>
+<td style="text-align: right;">-0.0618335</td>
+<td style="text-align: right;">-0.9242423</td>
+<td style="text-align: right;">-0.8889373</td>
+<td style="text-align: right;">-0.278143</td>
+<td style="text-align: right;">-0.2909624</td>
+<td style="text-align: right;">-0.2860174</td>
+<td style="text-align: right;">-0.2909087</td>
+<td style="text-align: right;">-0.2860689</td>
+<td style="text-align: right;">-0.2906768</td>
+<td style="text-align: right;">-0.2912252</td>
+<td style="text-align: right;">-0.2853847</td>
+<td style="text-align: right;">3.018419</td>
+<td style="text-align: right;">-0.3573269</td>
+<td style="text-align: right;">-0.3275356</td>
+<td style="text-align: right;">-2.355355</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.2300274</td>
+<td style="text-align: right;">0.5052295</td>
+<td style="text-align: right;">-0.1209819</td>
+<td style="text-align: right;">0.8534573</td>
+<td style="text-align: right;">-0.4358565</td>
+<td style="text-align: right;">-0.1930191</td>
+<td style="text-align: right;">-0.3481648</td>
+<td style="text-align: right;">0.7946676</td>
+<td style="text-align: right;">-1.726919</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">-0.0101725</td>
+<td style="text-align: right;">-0.007095</td>
+<td style="text-align: right;">-0.007095</td>
+<td style="text-align: right;">-0.0378107</td>
+<td style="text-align: right;">-1.727704</td>
+<td style="text-align: right;">-0.1460816</td>
+<td style="text-align: right;">-0.0073847</td>
+<td style="text-align: right;">-0.0073847</td>
+<td style="text-align: right;">-0.0608575</td>
+<td style="text-align: right;">-0.0465443</td>
+<td style="text-align: right;">-0.029337</td>
+<td style="text-align: right;">-0.0203483</td>
+<td style="text-align: right;">-0.0074788</td>
+<td style="text-align: right;">-0.0068951</td>
+<td style="text-align: right;">-0.2423889</td>
+<td style="text-align: right;">-0.0126264</td>
+<td style="text-align: right;">-0.1116211</td>
+<td style="text-align: right;">-0.0788855</td>
+<td style="text-align: right;">-0.1086493</td>
+<td style="text-align: right;">2.7684555</td>
+<td style="text-align: right;">-0.1128537</td>
+<td style="text-align: right;">-0.0123463</td>
+<td style="text-align: right;">-0.0618335</td>
+<td style="text-align: right;">-0.9242423</td>
+<td style="text-align: right;">-0.8889373</td>
+<td style="text-align: right;">-0.278143</td>
+<td style="text-align: right;">-0.2909624</td>
+<td style="text-align: right;">-0.2860174</td>
+<td style="text-align: right;">-0.2909087</td>
+<td style="text-align: right;">-0.2860689</td>
+<td style="text-align: right;">-0.2906768</td>
+<td style="text-align: right;">-0.2912252</td>
+<td style="text-align: right;">-0.2853847</td>
+<td style="text-align: right;">3.018419</td>
+<td style="text-align: right;">-0.3573269</td>
+<td style="text-align: right;">-0.3275356</td>
+<td style="text-align: right;">-2.249099</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.5943907</td>
+<td style="text-align: right;">0.4770352</td>
+<td style="text-align: right;">-0.0981227</td>
+<td style="text-align: right;">0.1924680</td>
+<td style="text-align: right;">-0.5124558</td>
+<td style="text-align: right;">-0.1930191</td>
+<td style="text-align: right;">-0.3481648</td>
+<td style="text-align: right;">1.0836135</td>
+<td style="text-align: right;">-1.726555</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">-0.0101725</td>
+<td style="text-align: right;">-0.007095</td>
+<td style="text-align: right;">-0.007095</td>
+<td style="text-align: right;">-0.0378107</td>
+<td style="text-align: right;">-1.727704</td>
+<td style="text-align: right;">-0.1460816</td>
+<td style="text-align: right;">-0.0073847</td>
+<td style="text-align: right;">-0.0073847</td>
+<td style="text-align: right;">-0.0608575</td>
+<td style="text-align: right;">-0.0465443</td>
+<td style="text-align: right;">-0.029337</td>
+<td style="text-align: right;">-0.0203483</td>
+<td style="text-align: right;">-0.0074788</td>
+<td style="text-align: right;">-0.0068951</td>
+<td style="text-align: right;">-0.2423889</td>
+<td style="text-align: right;">-0.0126264</td>
+<td style="text-align: right;">-0.1116211</td>
+<td style="text-align: right;">-0.0788855</td>
+<td style="text-align: right;">-0.1086493</td>
+<td style="text-align: right;">2.7684555</td>
+<td style="text-align: right;">-0.1128537</td>
+<td style="text-align: right;">-0.0123463</td>
+<td style="text-align: right;">-0.0618335</td>
+<td style="text-align: right;">-0.9242423</td>
+<td style="text-align: right;">-0.8889373</td>
+<td style="text-align: right;">-0.278143</td>
+<td style="text-align: right;">-0.2909624</td>
+<td style="text-align: right;">-0.2860174</td>
+<td style="text-align: right;">-0.2909087</td>
+<td style="text-align: right;">-0.2860689</td>
+<td style="text-align: right;">-0.2906768</td>
+<td style="text-align: right;">-0.2912252</td>
+<td style="text-align: right;">-0.2853847</td>
+<td style="text-align: right;">3.018419</td>
+<td style="text-align: right;">-0.3573269</td>
+<td style="text-align: right;">-0.3275356</td>
+<td style="text-align: right;">-2.089715</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.6984945</td>
+<td style="text-align: right;">0.4544797</td>
+<td style="text-align: right;">-0.1044725</td>
+<td style="text-align: right;">0.0381514</td>
+<td style="text-align: right;">-0.5794801</td>
+<td style="text-align: right;">-0.1930191</td>
+<td style="text-align: right;">-0.3481648</td>
+<td style="text-align: right;">1.2280865</td>
+<td style="text-align: right;">-1.726373</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">-0.0101725</td>
+<td style="text-align: right;">-0.007095</td>
+<td style="text-align: right;">-0.007095</td>
+<td style="text-align: right;">-0.0378107</td>
+<td style="text-align: right;">-1.727704</td>
+<td style="text-align: right;">-0.1460816</td>
+<td style="text-align: right;">-0.0073847</td>
+<td style="text-align: right;">-0.0073847</td>
+<td style="text-align: right;">-0.0608575</td>
+<td style="text-align: right;">-0.0465443</td>
+<td style="text-align: right;">-0.029337</td>
+<td style="text-align: right;">-0.0203483</td>
+<td style="text-align: right;">-0.0074788</td>
+<td style="text-align: right;">-0.0068951</td>
+<td style="text-align: right;">-0.2423889</td>
+<td style="text-align: right;">-0.0126264</td>
+<td style="text-align: right;">-0.1116211</td>
+<td style="text-align: right;">-0.0788855</td>
+<td style="text-align: right;">-0.1086493</td>
+<td style="text-align: right;">2.7684555</td>
+<td style="text-align: right;">-0.1128537</td>
+<td style="text-align: right;">-0.0123463</td>
+<td style="text-align: right;">-0.0618335</td>
+<td style="text-align: right;">-0.9242423</td>
+<td style="text-align: right;">-0.8889373</td>
+<td style="text-align: right;">-0.278143</td>
+<td style="text-align: right;">-0.2909624</td>
+<td style="text-align: right;">-0.2860174</td>
+<td style="text-align: right;">-0.2909087</td>
+<td style="text-align: right;">-0.2860689</td>
+<td style="text-align: right;">-0.2906768</td>
+<td style="text-align: right;">-0.2912252</td>
+<td style="text-align: right;">-0.2853847</td>
+<td style="text-align: right;">3.018419</td>
+<td style="text-align: right;">-0.3573269</td>
+<td style="text-align: right;">-0.3275356</td>
+<td style="text-align: right;">-2.058875</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+</div>
+</div>
+</section>
+</section>
+<section id="model-building" class="level2">
+<h2 class="anchored" data-anchor-id="model-building">Model Building</h2>
+<p>Now it was finally time to build the predictive models! I used 5 different machine learning algorithms to do so: Linear Regression, K-Nearest Neighbor, Elastic Net Regression, Random Forest, and Gradient-Boosted Trees. All of the model types aside from the Linear Regression had specific hyperparameters that I could tune; hyperparameters are parameters external to the actual modeled data that control the learning process and performance of a model.</p>
+<p>The general steps for building a model using <code>tidymodels</code> are:</p>
+<ol type="1">
+<li><p>Specify the model type, computational engine, model mode, and hyperparameters to tune (if applicable). Since my problem involves predicting a continuous outcome variable, I always set the mode to <code>regression</code> during this step.</p></li>
+<li><p>Set up a workflow by combining the model specifications from step 1 with the model recipe.</p></li>
+<li><p>Create a tuning grid with a range of values for each hyperparameter of the model. Then train and evaluate versions of the model that use different combinations of the hyperparameters using the training data set. Since I have a lot of data and this step can take a long time to run, I saved the model tuning results as .Rds files to avoid re-running the model tuning.</p></li>
+<li><p>Compare the performance metric across all model versions and select the best one. Finalize the workflow with the best model and its specific hyperparameters.</p></li>
+<li><p>Fit the final model to the testing dataset to evaluate its predictive performance on new data.</p></li>
+</ol>
+<p>Steps 1-3 were included in the code chunks below for each model type I explored. Step 4 was included in the next section, <code>Model Results</code>, and step 5 was included in the <code>Best Model Results</code> section below.</p>
+<section id="linear-regression" class="level3">
+<h3 class="anchored" data-anchor-id="linear-regression">Linear Regression</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># define model engine and mode</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>lm_mod <span class="ot">&lt;-</span> parsnip<span class="sc">::</span><span class="fu">linear_reg</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  parsnip<span class="sc">::</span><span class="fu">set_engine</span>(<span class="st">"lm"</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="co"># set up workflow</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>lm_wkflow <span class="ot">&lt;-</span> workflows<span class="sc">::</span><span class="fu">workflow</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  workflows<span class="sc">::</span><span class="fu">add_model</span>(lm_mod) <span class="sc">%&gt;%</span> </span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  workflows<span class="sc">::</span><span class="fu">add_recipe</span>(smart_recipe)</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="co"># fit single lm model across all folds of training set</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>lm_res <span class="ot">&lt;-</span> tune<span class="sc">::</span><span class="fu">fit_resamples</span>(lm_wkflow, <span class="at">resamples =</span> smart_folds)</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="co"># save en results</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(lm_res, <span class="at">file =</span> <span class="st">"data/inter_data/lm_res.rda"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="k-nearest-neighbor" class="level3">
+<h3 class="anchored" data-anchor-id="k-nearest-neighbor">K-Nearest Neighbor</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># define model engine and mode</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>knn_mod <span class="ot">&lt;-</span> parsnip<span class="sc">::</span><span class="fu">nearest_neighbor</span>(<span class="at">neighbors =</span> <span class="fu">tune</span>()) <span class="sc">%&gt;%</span> </span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  parsnip<span class="sc">::</span><span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  parsnip<span class="sc">::</span><span class="fu">set_mode</span>(<span class="st">"regression"</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="co"># set up workflow</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>knn_wkflow <span class="ot">&lt;-</span> <span class="fu">workflow</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  workflows<span class="sc">::</span><span class="fu">add_model</span>(knn_mod) <span class="sc">%&gt;%</span> </span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  workflows<span class="sc">::</span><span class="fu">add_recipe</span>(smart_recipe)</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="co"># set up grid to tune neighbors</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>knn_grid <span class="ot">&lt;-</span> <span class="fu">grid_regular</span>(<span class="fu">neighbors</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">10</span>)), <span class="at">levels =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># tune neighbors for knn</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>knn_res <span class="ot">&lt;-</span> tune<span class="sc">::</span><span class="fu">tune_grid</span>(knn_wkflow, <span class="at">grid =</span> knn_grid, <span class="at">resamples =</span> smart_folds,</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">control =</span> <span class="fu">control_grid</span>(<span class="at">verbose =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="co"># save en results</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(knn_res, <span class="at">file =</span> <span class="st">"data/inter_data/knn_res.rda"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="elastic-net-regression" class="level3">
+<h3 class="anchored" data-anchor-id="elastic-net-regression">Elastic Net Regression</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># set up model</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>en_mod <span class="ot">&lt;-</span> parsnip<span class="sc">::</span><span class="fu">linear_reg</span>(<span class="at">penalty =</span> <span class="fu">tune</span>(), <span class="at">mixture =</span> <span class="fu">tune</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  parsnip<span class="sc">::</span><span class="fu">set_engine</span>(<span class="st">"glmnet"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  parsnip<span class="sc">::</span><span class="fu">set_mode</span>(<span class="st">"regression"</span>)</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="co"># set up workflow</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>en_wkflow <span class="ot">&lt;-</span> workflows<span class="sc">::</span><span class="fu">workflow</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  workflows<span class="sc">::</span><span class="fu">add_model</span>(en_mod) <span class="sc">%&gt;%</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>  workflows<span class="sc">::</span><span class="fu">add_recipe</span>(smart_recipe)</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a><span class="co"># create a regular grid for tuning penalty and mixture </span></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>en_grid <span class="ot">&lt;-</span> dials<span class="sc">::</span><span class="fu">grid_regular</span>(<span class="fu">penalty</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="fl">0.01</span>,<span class="dv">3</span>), <span class="at">trans =</span> <span class="fu">identity_trans</span>()), <span class="fu">mixture</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)), <span class="at">levels =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># tune hyperparameters for en</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>en_res <span class="ot">&lt;-</span> tune<span class="sc">::</span><span class="fu">tune_grid</span>(en_wkflow, <span class="at">grid =</span> en_grid, <span class="at">resamples =</span> smart_folds, </span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">control =</span> <span class="fu">control_grid</span>(<span class="at">verbose =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="co"># save en results</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(en_res, <span class="at">file =</span> <span class="st">"data/inter_data/en_res.rda"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="random-forest" class="level3">
+<h3 class="anchored" data-anchor-id="random-forest">Random Forest</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># set up model</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>rf_mod <span class="ot">&lt;-</span> parsnip<span class="sc">::</span><span class="fu">rand_forest</span>(<span class="at">mtry =</span> <span class="fu">tune</span>(), </span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>                               <span class="at">trees =</span> <span class="fu">tune</span>(),</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>                               <span class="at">min_n =</span> <span class="fu">tune</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"ranger"</span>, <span class="at">importance =</span> <span class="st">"impurity"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"regression"</span>)</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="co"># set up workflow</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>rf_wkflow <span class="ot">&lt;-</span> <span class="fu">workflow</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_model</span>(rf_mod) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_recipe</span>(smart_recipe)</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a><span class="co"># create a regular grid for tuning mtry, trees, and min_n</span></span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>rf_grid <span class="ot">&lt;-</span> dials<span class="sc">::</span><span class="fu">grid_regular</span>(<span class="fu">mtry</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">15</span>)), <span class="co"># n predictors that will be randomly sampled at each split when creating tree models</span></span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>                               <span class="fu">trees</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">200</span>, <span class="dv">400</span>)), <span class="co"># n of trees contained </span></span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>                               <span class="fu">min_n</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">30</span>)) <span class="co"># min n of data points in a node required for the node to be split further</span></span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>                               )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># tune hyperparameters for rf</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>rf_res <span class="ot">&lt;-</span> tune<span class="sc">::</span><span class="fu">tune_grid</span>(rf_wkflow, <span class="at">resamples =</span> smart_folds, <span class="at">grid =</span> rf_grid,</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">control =</span> <span class="fu">control_grid</span>(<span class="at">verbose =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="co"># save rf results</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(rf_res, <span class="at">file =</span> <span class="st">"data/inter_data/rf_res.rda"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="gradient-boosted-tree" class="level3">
+<h3 class="anchored" data-anchor-id="gradient-boosted-tree">Gradient-Boosted Tree</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># set up model</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>bt_mod <span class="ot">&lt;-</span> <span class="fu">boost_tree</span>(<span class="at">mtry =</span> <span class="fu">tune</span>(),</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">trees =</span> <span class="fu">tune</span>(), </span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>                     <span class="at">learn_rate =</span> <span class="fu">tune</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"xgboost"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"regression"</span>)</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="co"># set up workflow</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>bt_wkflow <span class="ot">&lt;-</span> <span class="fu">workflow</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_model</span>(bt_mod) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_recipe</span>(smart_recipe)</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="co"># create a regular grid for tuning mtry, trees, and learning rate</span></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>bt_grid <span class="ot">&lt;-</span> <span class="fu">grid_regular</span>(<span class="fu">mtry</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">15</span>)), </span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">trees</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">200</span>, <span class="dv">400</span>)),</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">learn_rate</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">10</span>, <span class="sc">-</span><span class="dv">1</span>)),</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>                        <span class="at">levels =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># tune hyperparameters for bt</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>bt_res <span class="ot">&lt;-</span> <span class="fu">tune_grid</span>(bt_wkflow, <span class="at">resamples =</span> smart_folds, <span class="at">grid =</span> bt_grid, <span class="at">control =</span> <span class="fu">control_grid</span>(<span class="at">verbose =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="co"># save rf results</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(bt_res, <span class="at">file =</span> <span class="st">"data/inter_data/bt_res.rda"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="model-results" class="level2">
+<h2 class="anchored" data-anchor-id="model-results">Model Results</h2>
+<p>After all of the models were built, I compared their performance by evaluating the root mean squared error (RMSE) values of each. The RMSE (root mean squared error) measures the magnitude of error between predicted and actual values - lower RMSE values therefore reflect better model performance. Some of the autoplots also displayed the <span class="math inline">\(R^2\)</span> values of the models, which explains the variance of the actual observed values where 1 is a perfect fit - higher <span class="math inline">\(R^2\)</span> values therefore reflect better model performance.</p>
+<p>I use the <code>autoplot</code> function to view each model’s RMSE and the <code>show_best</code> function from the <code>tune</code> package to determine the best-performing models from those that I tuned.</p>
+<section id="linear-regression-1" class="level3">
+<h3 class="anchored" data-anchor-id="linear-regression-1">Linear Regression</h3>
+<p>There are no hyperparameters to tune in linear regression models, so I only developed one version of this model type. The mean RMSE across all 5 folds of the training data was <code>0.787</code> with a standard error of <code>0.00552</code>.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># load lm results</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2024-03-22-machine-learning-weather-energy/data/inter_data/lm_res.rda"</span>))</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="co"># show best model</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>lm_res <span class="sc">%&gt;%</span> tune<span class="sc">::</span><span class="fu">show_best</span>(<span class="at">metric =</span> <span class="st">"rmse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 6
+  .metric .estimator  mean     n std_err .config             
+  &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
+1 rmse    standard   0.787     5 0.00552 Preprocessor1_Model1</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># save best model results</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>lm_best <span class="ot">&lt;-</span> lm_res <span class="sc">%&gt;%</span> tune<span class="sc">::</span><span class="fu">show_best</span>(<span class="at">metric =</span> <span class="st">"rmse"</span>) <span class="sc">%&gt;%</span> <span class="fu">slice</span>(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="k-nearest-neighbor-1" class="level3">
+<h3 class="anchored" data-anchor-id="k-nearest-neighbor-1">K-Nearest Neighbor</h3>
+<p>In K-Nearest Neighbor models, we can tune the <code>K</code> hyperparameter, which specified the number of neighbors that should be considered when evaluating an observation’s expected value. I tuned my K-Nearest Model for 5 values of <code>K</code> between 1 to 10.</p>
+<p>Based on the autoplot, RMSE decreases and <span class="math inline">\(R^2\)</span> increases as the value of <code>K</code> increases. The best performing model version had <code>K = 10</code> with a mean RMSE across all 5 folds of <code>1.06</code> and a standard error of <code>0.00465</code>.</p>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># load knn results</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2024-03-22-machine-learning-weather-energy/data/inter_data/knn_res.rda"</span>))</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="co"># plot</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>knn_res <span class="sc">%&gt;%</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">autoplot</span>() <span class="sc">+</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"lato"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># show best models</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>knn_res <span class="sc">%&gt;%</span> tune<span class="sc">::</span><span class="fu">show_best</span>(<span class="at">metric =</span> <span class="st">"rmse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 7
+  neighbors .metric .estimator  mean     n std_err .config             
+      &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
+1        10 rmse    standard    1.06     5 0.00465 Preprocessor1_Model5
+2         7 rmse    standard    1.10     5 0.00456 Preprocessor1_Model4
+3         5 rmse    standard    1.13     5 0.00439 Preprocessor1_Model3
+4         3 rmse    standard    1.16     5 0.00424 Preprocessor1_Model2
+5         1 rmse    standard    1.19     5 0.00395 Preprocessor1_Model1</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># save best model results</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>knn_best <span class="ot">&lt;-</span> knn_res <span class="sc">%&gt;%</span> tune<span class="sc">::</span><span class="fu">show_best</span>(<span class="at">metric =</span> <span class="st">"rmse"</span>) <span class="sc">%&gt;%</span> <span class="fu">slice</span>(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="elastic-net-regression-1" class="level3">
+<h3 class="anchored" data-anchor-id="elastic-net-regression-1">Elastic Net Regression</h3>
+<p>In Elastic Net Regression models, we can tune the <code>penalty</code> and <code>mixture</code> hyperparameters, which specify the …, respectively. I tuned my Elastic Net Regression models for 10 levels of <code>penalty</code> between 0.01 to 3 and 10 levels of <code>mixture</code> between 0 to 1. When <code>mixture = 0</code>, the model is actually performing a ridge regression and when <code>mixture = 1</code>, the model is performing a lasso regression.</p>
+<p>Based on the autoplot, RMSE decreases and <span class="math inline">\(R^2\)</span> increases as the values of <code>mixture</code>, or the proportion of lasso penalty, and <code>penalty</code>, or the amount of regularization, both decrease. The best performing model version had <code>mixture = 0.111</code>, which means it is much closer to being a ridge regression. The best model also had <code>penalty = 0.01</code>, a mean RMSE across all folds of <code>0.788</code>, and a standard error of <code>0.00552</code>.</p>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># load en results</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2024-03-22-machine-learning-weather-energy/data/inter_data/en_res.rda"</span>))</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="co"># plot</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>en_res <span class="sc">%&gt;%</span></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">autoplot</span>() <span class="sc">+</span></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"lato"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># show best models</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>en_res <span class="sc">%&gt;%</span> tune<span class="sc">::</span><span class="fu">show_best</span>(<span class="at">metric =</span> <span class="st">"rmse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 8
+  penalty mixture .metric .estimator  mean     n std_err .config               
+    &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;                 
+1    0.01   0.111 rmse    standard   0.788     5 0.00552 Preprocessor1_Model011
+2    0.01   0.222 rmse    standard   0.788     5 0.00552 Preprocessor1_Model021
+3    0.01   0.333 rmse    standard   0.789     5 0.00552 Preprocessor1_Model031
+4    0.01   0.444 rmse    standard   0.789     5 0.00552 Preprocessor1_Model041
+5    0.01   0     rmse    standard   0.789     5 0.00547 Preprocessor1_Model001</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># save best model results</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>en_best <span class="ot">&lt;-</span> en_res <span class="sc">%&gt;%</span> tune<span class="sc">::</span><span class="fu">show_best</span>(<span class="at">metric =</span> <span class="st">"rmse"</span>) <span class="sc">%&gt;%</span> <span class="fu">slice</span>(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="random-forest-1" class="level3">
+<h3 class="anchored" data-anchor-id="random-forest-1">Random Forest</h3>
+<p>In random forest models, we can tune the <code>mtry</code>, <code>trees</code>, and <code>min_n</code> hyperparameters. <code>mtry</code> represents the number of parameters that can be randomly chosen from at each split of the tree. When <code>mtry</code> is less than 1, that means the tree will have no parameters to choose from. When <code>mtry = 15</code>, the tree has access to all of the predictors at each split, which is the same as bagging. I cannot use a <code>mtry</code> greater than 15 because my model recipe only includes 15 predictors, so I used 3 values between 1 to 15. <code>trees</code> represents the total number of trees to include in the forest ensemble. I used 3 values of trees between 200 to 400. <code>min_n</code> represents the minimum number of observations that need to be in a node in order for it to be split further. I used <code>min_n</code> values between 10 to 30 during the tuning process.**</p>
+<p>Based on the autoplot the number of trees does not make much of a difference in model performance, as all the colored lines are virtually on top of each other. The minimal node size did not appear to make much of a difference either, although it looks like <code>min_n = 30</code> had a slightly lower RMSE than the lower values. The models that had access to 8 parameters at every split consistently performed the best. The best model had <code>mtry = 8</code>, <code>trees = 300</code>, and <code>min_n = 30</code> with a mean RMSE across all folds of <code>0.760</code> and a standard error of <code>0.00563</code>.</p>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># load rf results</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2024-03-22-machine-learning-weather-energy/data/inter_data/rf_res.rda"</span>))</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="co"># plot</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>rf_res <span class="sc">%&gt;%</span> <span class="fu">autoplot</span>() <span class="sc">+</span> </span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"lato"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># show best rf models</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>rf_res <span class="sc">%&gt;%</span> tune<span class="sc">::</span><span class="fu">show_best</span>(<span class="at">metric =</span> <span class="st">"rmse"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 9
+   mtry trees min_n .metric .estimator  mean     n std_err .config              
+  &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;                
+1     8   300    30 rmse    standard   0.760     5 0.00563 Preprocessor1_Model23
+2     8   400    20 rmse    standard   0.760     5 0.00562 Preprocessor1_Model17
+3     8   400    30 rmse    standard   0.760     5 0.00562 Preprocessor1_Model26
+4     8   400    10 rmse    standard   0.760     5 0.00562 Preprocessor1_Model08
+5     8   200    30 rmse    standard   0.760     5 0.00562 Preprocessor1_Model20</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># save best model results</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>rf_best <span class="ot">&lt;-</span> rf_res <span class="sc">%&gt;%</span> tune<span class="sc">::</span><span class="fu">show_best</span>(<span class="at">metric =</span> <span class="st">"rmse"</span>) <span class="sc">%&gt;%</span> <span class="fu">slice</span>(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="gradient-boosted-tree-1" class="level3">
+<h3 class="anchored" data-anchor-id="gradient-boosted-tree-1">Gradient-Boosted Tree</h3>
+<p>In Gradient-Boosted Decision Tree models, we can tune the <code>mtry</code>, <code>trees</code>, <code>min_n</code>, and <code>learn_rate</code> hyperparameters. The first three were described above in the Random Forest model results and the last one, <code>learn_rate</code>, represents how fast the boosted tree changes with each iteration. When <code>learn_rate = 0</code>, the tree doesn’t learn at all and at small values of <code>learn_rate</code>, the tree learns very slowly. I tuned my Gradient-Boosted Tree for 5 values of <code>learn_rate</code> between <span class="math inline">\(10^{-10}\)</span> to <span class="math inline">\(10^{-1}\)</span>. Since this hyperparameter is the most impactful for gradient-boosted trees, I opted not to tune an alternative hyperparameter, <code>min_n</code> to reduce the computational power required. I did try out 5 values of <code>mtry</code> between 1 to 15 and 5 values of <code>trees</code> between 200 to 400 as well though.</p>
+<p>Based on the autoplot, models with larger learning rates had the best performance. The number of trees did not make as significant a difference and the number of parameters that were available at every split did not make as much of a difference in most models, although models with <code>mtry &lt; 4</code> had slightly worse performance. The best performing model had <code>mtry = 15</code>, <code>trees = 200</code>, and <code>learn_rate = 0.1</code> with a mean RMSE across all folds of <code>0.755</code> and a standard error of <code>0.00568</code>.</p>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># load bt results</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2024-03-22-machine-learning-weather-energy/data/inter_data/bt_res.rda"</span>))</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="co"># plot</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>bt_res <span class="sc">%&gt;%</span> <span class="fu">autoplot</span>() <span class="sc">+</span> </span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"lato"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co"># show best rf models</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>bt_res <span class="sc">%&gt;%</span> tune<span class="sc">::</span><span class="fu">show_best</span>(<span class="at">metric =</span> <span class="st">"rmse"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 9
+   mtry trees learn_rate .metric .estimator  mean     n std_err .config         
+  &lt;int&gt; &lt;int&gt;      &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;           
+1    15   200        0.1 rmse    standard   0.755     5 0.00568 Preprocessor1_M…
+2    11   200        0.1 rmse    standard   0.755     5 0.00561 Preprocessor1_M…
+3    15   250        0.1 rmse    standard   0.755     5 0.00570 Preprocessor1_M…
+4    11   250        0.1 rmse    standard   0.755     5 0.00562 Preprocessor1_M…
+5     8   250        0.1 rmse    standard   0.755     5 0.00563 Preprocessor1_M…</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co"># save best model results</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>bt_best <span class="ot">&lt;-</span> bt_res <span class="sc">%&gt;%</span> tune<span class="sc">::</span><span class="fu">show_best</span>(<span class="at">metric =</span> <span class="st">"rmse"</span>) <span class="sc">%&gt;%</span> <span class="fu">slice</span>(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="best-model-results" class="level2">
+<h2 class="anchored" data-anchor-id="best-model-results">Best Model Results</h2>
+<p>Once I combined the lowest RMSE from each model type, it was clear that a Gradient-Boosted Tree is the winner! It has a slightly lower RMSE than the runner-ups and predicted <code>hourly_average_power_kw</code> values that deviate from the actual observed values by approximately 0.755 kw on average. As mentioned above, the best performing model had <code>mtry = 15</code>, <code>trees = 200</code>, and <code>learn_rate = 0.1</code> with a mean RMSE across all folds of <code>0.755</code> and a standard error of <code>0.00568</code>.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># combine best performance results from each model type</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>all_rmse <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">Model =</span> <span class="fu">c</span>(<span class="st">"Linear Regression"</span>, <span class="st">"K-Nearest Neighbor"</span>, <span class="st">"Elastic Net Regression"</span>, <span class="st">"Random Forest"</span>, <span class="st">"Gradient-Boosted Trees"</span>), <span class="at">RMSE =</span> <span class="fu">c</span>(lm_best<span class="sc">$</span>mean, knn_best<span class="sc">$</span>mean, en_best<span class="sc">$</span>mean, rf_best<span class="sc">$</span>mean, bt_best<span class="sc">$</span>mean)) <span class="sc">%&gt;%</span> </span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">RMSE =</span> <span class="fu">round</span>(RMSE, <span class="dv">3</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(RMSE)</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>all_rmse <span class="sc">%&gt;%</span> </span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">full_width =</span> F, <span class="at">font =</span> <span class="st">"lato"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Model</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">RMSE</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Gradient-Boosted Trees</td>
+<td style="text-align: right;">0.755</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Random Forest</td>
+<td style="text-align: right;">0.760</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Linear Regression</td>
+<td style="text-align: right;">0.787</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Elastic Net Regression</td>
+<td style="text-align: right;">0.788</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">K-Nearest Neighbor</td>
+<td style="text-align: right;">1.060</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+<p>Next I finalized the workflow using the hyperparameters from the best Gradient-Boosted Tree model and fit it to the entire training dataset.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co"># save best model </span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>best_mod <span class="ot">&lt;-</span> bt_res <span class="sc">%&gt;%</span> </span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>  tune<span class="sc">::</span><span class="fu">select_best</span>(<span class="at">metric =</span> <span class="st">"rmse"</span>, mtries, trees, learn_rate)</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a><span class="co"># finalize workflow with best model</span></span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>final_wkflow <span class="ot">&lt;-</span> tune<span class="sc">::</span><span class="fu">finalize_workflow</span>(bt_wkflow, best_mod)</span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a><span class="co"># fit model to training data</span></span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>final_fit_mod <span class="ot">&lt;-</span> parsnip<span class="sc">::</span><span class="fu">fit</span>(final_wkflow, smart_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>One cool thing about tree-based models is we can visualize which predictors were the most significant drivers of the outcome through a variable importance plot (VIP). Based on the VIP for the best model, the PC1 feature was the most important predictor variable by far; remember, the PC1 feature was extracted from the original <code>temperature</code>, <code>apparent_temperature</code>, and <code>dew_point</code> parameters, which were highly correlated (&gt; 90%) to each other. The <code>time</code> parameter was the second most important variable, followed by <code>hour</code> and <code>months</code>. This result makes sense but surprised me! I was expecting more weather-related parameters to show up in the top 10.</p>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co"># create variable importance plot using training data</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>final_fit_mod <span class="sc">%&gt;%</span> </span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>  workflowsets<span class="sc">::</span><span class="fu">extract_fit_parsnip</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>  vip<span class="sc">::</span><span class="fu">vip</span>(<span class="at">aesthetics =</span> <span class="fu">list</span>(<span class="at">fill =</span> <span class="st">"#DAA49A"</span>, <span class="at">color =</span> <span class="st">"#875053"</span>)) <span class="sc">+</span></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"lato"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Next, it was finally time to introduce the best model to data its never seen before! I ran the model on the testing dataset to see how well it could predict values it was not trained on. The model’s RMSE on the testing dataset was 0.835, which is only slightly worse than the mean RMSE from the training process. This indicates that the training RMSE across 5-folds was a pretty good indicator of the model’s overall performance.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="co"># assess model performance on entire testing set</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>final_mod_test <span class="ot">&lt;-</span> <span class="fu">augment</span>(final_fit_mod, smart_test) <span class="sc">%&gt;%</span> </span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rmse</span>(<span class="at">truth =</span> hourly_average_power_kw, <span class="at">estimate =</span> .pred) <span class="sc">%&gt;%</span> </span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 3
+  .metric .estimator .estimate
+  &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt;
+1 rmse    standard       0.835</code></pre>
+</div>
+</div>
+<p>When I plotted the predicted values of power usage against the actual observed values, it was clear that the model does not predict high values well at all; in fact, the model did not predict any power usage values higher than 3.75 kW. This is due to that strong positive skew in the outcome variable, which means even our best model was only trained with a handful of observations for the higher power usage values. Only the values that fall directly on the diagonal line in the plot below were accurately predicted by the model.</p>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co"># plot predicted vs. actual values from testing data</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a><span class="fu">augment</span>(final_fit_mod, smart_test) <span class="sc">%&gt;%</span> </span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .pred, <span class="at">y =</span> hourly_average_power_kw)) <span class="sc">+</span></span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">"#DAA49A"</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">lty =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_obs_pred</span>() <span class="sc">+</span></span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Predicted vs. Actual Values of Hourly Average Power Usage (kW)"</span>,</span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Actual Hourly Average Power Usage (kW)"</span>,</span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Predicted Hourly Average Power Usage (kW)"</span>) <span class="sc">+</span></span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()<span class="sc">+</span></span>
+<span id="cb55-11"><a href="#cb55-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"lato"</span>),</span>
+<span id="cb55-12"><a href="#cb55-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Update this with fake or untested data for blog post when have mroe time. </span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a><span class="co"># For fun, I used the model to predict residential power usage during the warmest and coolest observations in smart df. </span></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a><span class="co"># filter to observations with highest and lowest temperature</span></span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>extreme_temps <span class="ot">&lt;-</span> smart_mod <span class="sc">%&gt;%</span></span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">row_number</span>() <span class="sc">==</span> <span class="fu">which.max</span>(temperature) <span class="sc">|</span> <span class="fu">row_number</span>() <span class="sc">==</span> <span class="fu">which.min</span>(temperature))</span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a>final_predictions <span class="ot">&lt;-</span> <span class="fu">augment</span>(final_fit_mod, extreme_temps) <span class="sc">%&gt;%</span> </span>
+<span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(.pred, hourly_average_power_kw, temperature, <span class="fu">everything</span>())</span>
+<span id="cb56-9"><a href="#cb56-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-10"><a href="#cb56-10" aria-hidden="true" tabindex="-1"></a>final_predictions </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>The best model for predicting residential energy usage based on weather and time was a Gradient-Boosted Tree model. A Random Forest model did nearly as well, with only a small difference in RMSE separating the two. This is no surprise since decision tree-based models tend to work really well on many types of data. This is because tree-based models are highly flexible and non-parametric, meaning they do not assume any parametric constraints on the outcome variable. Interestingly, the Elastic Net Regression and Linear Regression models had a pretty similar performance to these top tree-based models, indicating that they also do a decent job of predicting residential energy usage; these model types could be more useful to a user who is willing to accept a little higher error in order to use models that are much less computationally expensive. The K-Nearest Neighbor model had the worst predictive power, which makes sense since KNN models tend to do poorly on data with too many predictors, or high dimensions.</p>
+<p>Overall, the best model did an okay job at predicting residential energy usage. The actual values of the outcome variable, <code>hourly_average_power_kw</code>, ranged between 0 to 11.5 kW. On average, the best model’s predicted values were about 0.835 kW off from the actual observed values based on the testing RMSE; this means the model’s average error was about 7% of the entire range. The model could be improved by adding in more data values that have high energy usage values. By normalizing the distribution of the outcome variable in this way, I could improve the model’s learning and potentially improve its performance.</p>
+<p>It was interesting to see that the principal component of <code>temperature</code>, <code>apparent_temperature</code>, and <code>dew_point</code> is the most important predictor of residential energy usage. Since apparent temperature itself is also a factor of relative humidity and wind speed, this principal component feature may represent all the key weather predictors due to their interrelatedness. Therefore, it makes sense that time variables (hour, time, month) would be the next most important predictors in the VIP rather than some of the general weather predictors that remained (descriptive weather summary, wind-bearing, etc.). This makes intuitive sense and it was fun to see it explained quantitatively. I learned a lot through this project and am looking forward to exploring more energy data with machine learning algorithms!</p>
+
+
+</section>
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Thorve et al., 2023. https://www.nature.com/articles/s41597-022-01914-1#Tab1<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Fikru and Gautier, 2015. https://www.sciencedirect.com/science/article/pii/S030626191500046X#ab005<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Barker, S. UMass Smart* Dataset - 2017 release. UMassTraceRepository https://traces.cs.umass.edu/index.php/smart/smart (2017).<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item">
+ Copyright 2024, Kristin Art
+  </li>  
+</ul>
+    </div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+</body></html>
