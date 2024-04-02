@@ -389,6 +389,8 @@ p1 <-
 #p1
 ```
 
+![](histogram.png)
+
 I would also like to color the region names in the text using those same 4 colors, but will have to do so when I have more time to troubleshoot the tension between my graphic device and `element_markdown()`displays…
 
 ### General Design
