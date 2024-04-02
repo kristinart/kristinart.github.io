@@ -17,7 +17,7 @@ toc-title: Contents
 <meta http-equiv='expires' content='0'> 
 <meta http-equiv='pragma' content='no-cache'>
 ::: {.column-page}
-![](infographic_final_ss.png)
+![](infographic_final.png)
 ::: 
 
 ### Overview
@@ -266,7 +266,7 @@ I used various text forms to explicitly state the story since most people are no
 
 I removed or lightened all the plot grid lines and used a white background for the infographic to reduce the amount of unnecessary ink included. I used the `Montserrat` font family throughout the infographic because my Master’s Group Project used it for our deliverables; that may be silly, but I found it really satisfying to stay consistent and also believe `Montserrat` invokes positive emotions and friendliness. I also used a slab serif, `Alfa Slab One,` to make the title stand out. 
 
-I developed a pleasing color palette by using coolors.co and made sure they were accessible for people with visual impairments through the website’s tools. I intentionally used the same 4 distinctive colors to represent the regions of California across all the subplots and increased their transparency at times to improve readability. 
+I developed a pleasing color palette by using `coolors.co` and made sure they were accessible for people with visual impairments through the website’s tools. I intentionally used the same 4 distinctive colors to represent the regions of California across all the subplots and increased their transparency at times to improve readability. 
 
 ```{r warning = FALSE, message = FALSE, out.width = "120%"}
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -386,7 +386,7 @@ p1 <-
   ) +
   guides(fill = guide_legend(reverse = TRUE))
 
-p1
+#p1
 ```
 
 I would also like to color the region names in the text using those same 4 colors, but will have to do so when I have more time to troubleshoot the tension between my graphic device and `element_markdown()`displays…
@@ -474,7 +474,7 @@ p3 <-
     legend.text = element_text(size = 10, family = "mont", face = "bold"),
     legend.direction = "horizontal",
     legend.position = "top",
-    legend.justification = c(4, 0),
+    legend.justification = c(0, 0),
     legend.spacing.x = unit(-0, "lines"),
     legend.margin = margin(-5, -5, 0, 0),
     axis.title = element_text(size = 12, family = "mont"),
@@ -505,7 +505,7 @@ p3 <-
     alpha = 0.5
   )
 
-p3
+#p3
 
 # add to blank plot to create white space ----
 # p3 <- ggplot() +
@@ -517,6 +517,8 @@ p3
 
 #p3
 ```
+
+![](socal_h2_difference.png)
 
 ### Contextualization and DEI 
 
