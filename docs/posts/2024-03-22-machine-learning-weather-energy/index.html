@@ -223,6 +223,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta http-equiv="cache-control" content="no-cache">
 <meta http-equiv="expires" content="0">
 <meta http-equiv="pragma" content="no-cache">
+<div class="cell">
+<style type="text/css">
+.panel-tabset .nav-item {
+  font-size: 18px;
+  font-style: bold
+  
+}
+
+
+</style>
+</div>
 <div class="column-body-outset">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -240,7 +251,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">Introduction</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">EDA</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-3" role="tab" aria-controls="tabset-1-3" aria-selected="false">Model Set-Up</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-4" role="tab" aria-controls="tabset-1-4" aria-selected="false">Model Building</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-5-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-5" role="tab" aria-controls="tabset-1-5" aria-selected="false">Model Results</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-6-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-6" role="tab" aria-controls="tabset-1-6" aria-selected="false">Best Model Results</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
-<p>It is important to understand the relationship between weather and energy consumption to inform how we plan and manage energy infrastructure to meet high energy demand events. <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> Understanding this relationship at a fine temporal and spatial scale could allow us to mitigate the extent of weather-related energy strain and impact on people. This is especially relevant in today’s day and age, as climate change alters regional temperatures and increases the frequency of extreme weather events. Improving the efficiency of energy consumption will work in tandem with grid modernization to meet climate and sustainability goals.</p>
+<p>Weather influences how much energy we use in our homes. The relationship between weather and energy consumption can therefore inform how to best plan and manage energy infrastructure to meet high energy demand events. <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> Understanding this relationship at a fine temporal and spatial scale could allow us to mitigate the extent of weather-related energy strain and impact on people. This is especially relevant in today’s day and age, as climate change alters regional temperatures and increases the frequency of extreme weather events. Improving the efficiency of energy consumption will work in tandem with grid modernization to meet climate and sustainability goals.</p>
 <p>In this project, I investigate how energy use within residential homes varies based on weather. Past research has shown that there is significant variation in residential energy use within a day. <a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> This intuitively makes sense, as most people turn their lights on at night and use more cooking appliances around mealtimes. It’s also well-known that more energy is consumed during the winter months in cold regions due to the generation of heat for warmth. Here, I use high-resolution data from residential apartments to build models that predict hourly energy consumption based on weather patterns.</p>
 <section id="research-question" class="level3">
 <h3 class="anchored" data-anchor-id="research-question">Research Question</h3>
@@ -253,7 +264,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="project-approach" class="level3">
 <h3 class="anchored" data-anchor-id="project-approach">Project Approach</h3>
-<p>Before I dive right into the project, here is a brief overview of my approach: I began by loading, tidying, and exploring the data. During this phase, I aggregated the per-minute consumption data into hourly averages and randomly sampled a subset of the apartments to reduce the computational power required to perform the analysis. I also removed variables with a large amount of missing observations and performed a casewise deletion for smaller cases of missingness. Then I visually explored the remaining variables to determine whether I needed to make any specific adjustments in my models - I did find that three predictors were highly correlated (&gt; 90%), which informed my decision to reduce them into one principal component before running my models. Next, I split my clean data into training and testing datasets that were stratified on the outcome variable, split the training datasets into 5-folds for cross validation, and specified my model recipe. I then built, tuned, and compared the following model types: Linear Regression, K-Nearest Neighbor, Elastic Net Regression, Random Forest, and Gradient-Boosted Tree. I evaluated the performance of all model iterations based on root mean squared error (RMSE), finalized the workflow for the best model, and fit it to the testing dataset to determine how well it could predict energy consumption based on new data. Now let’s get into the details!</p>
+<p>Before I dive right into the project, here is a brief overview of my approach:</p>
+<ol type="1">
+<li><p>I began by loading, tidying, and exploring the data. During this phase, I aggregated the per-minute consumption data into hourly averages and randomly sampled a subset of the apartments to reduce the computational power required to perform the analysis. I also removed variables with a large amount of missing observations and performed a casewise deletion for smaller cases of missingness. Then I visually explored the remaining variables to determine whether I needed to make any specific adjustments in my models - I did find that three predictors were highly correlated (&gt; 90%), which informed my decision to reduce them into one principal component before running my models.</p></li>
+<li><p>Next, I split my clean data into training and testing datasets that were stratified on the outcome variable, split the training dataset into 5-folds for cross validation, and specified my model recipe.</p></li>
+<li><p>I then built, tuned, and compared the following model types: Linear Regression, K-Nearest Neighbor, Elastic Net Regression, Random Forest, and Gradient-Boosted Tree.</p></li>
+<li><p>I evaluated the performance of all model iterations based on root mean squared error (RMSE), finalized the workflow for the best model, and fit it to the testing dataset to determine how well it could predict energy consumption based on new data.</p></li>
+</ol>
+<p>Now click on the tabs to get into the details!</p>
 </section>
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
@@ -1592,7 +1610,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
 </figure>
 </div>
 </div>
@@ -1647,7 +1665,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
 </figure>
 </div>
 </div>
@@ -1701,7 +1719,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
 </figure>
 </div>
 </div>
@@ -1755,7 +1773,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
 </figure>
 </div>
 </div>
@@ -1783,7 +1801,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 </div>
 <div id="tabset-1-6" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-6-tab">
-<p>Once I combined the lowest RMSE from each model type, it was clear that a Gradient-Boosted Tree is the winner! It has a slightly lower RMSE than the runner-ups and predicted <code>hourly_average_power_kw</code> values that deviate from the actual observed values by approximately 0.755 kw on average. As mentioned above, the best performing model had <code>mtry = 15</code>, <code>trees = 200</code>, and <code>learn_rate = 0.1</code> with a mean RMSE across all folds of <code>0.755</code> and a standard error of <code>0.00568</code>.</p>
+<p>Once I combined the lowest RMSE from each model type, it was clear that a Gradient-Boosted Tree was the winner! It has a slightly lower RMSE than the runner-ups and predicted <code>hourly_average_power_kw</code> values that deviate from the actual observed values by approximately 0.755 kw on average. As mentioned above, the best performing model had <code>mtry = 15</code>, <code>trees = 200</code>, and <code>learn_rate = 0.1</code> with a mean RMSE across all folds of <code>0.755</code> and a standard error of <code>0.00568</code>.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -1860,7 +1878,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
 </figure>
 </div>
 </div>
@@ -1901,7 +1919,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
 </figure>
 </div>
 </div>
