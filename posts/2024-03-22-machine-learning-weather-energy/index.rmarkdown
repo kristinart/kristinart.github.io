@@ -1,0 +1,854 @@
+---
+title: "Predicting Residential Energy Usage based on Weather"
+description: "Machine learning models to predict energy use"
+author: Kristin Art
+date: 03-22/2024
+categories: [R, Quarto, Git, Energy, Machine Learning] # self-defined categories
+#citation: 
+#  url: https://samanthacsik.github.io/posts/2022-10-24-my-blog-post/ 
+image: preview.png
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+#bibliography: references.bib
+code-fold: true
+toc-depth: 3
+toc-title: Contents
+toc-expand: true
+website:
+  back-to-top-navigation: true
+---
+
+
+<meta http-equiv='cache-control' content='no-cache'>
+
+<meta http-equiv='expires' content='0'>
+
+<meta http-equiv='pragma' content='no-cache'>
+
+
+```{css, echo=FALSE}
+.panel-tabset .nav-item {
+  font-size: 18px;
+  font-style: bold
+  
+}
+
+
+```
+
+
+::: column-body-outset
+![Conceptual diagram of the relationship between weather and residential energy. Photograph sourced from https://vectormine.com/item/weather-impact-on-energy-consumption-and-household-usage-outline-concept/.](preview.png)
+:::
+
+# Predicting Residential Energy Usage based on Weather
+
+#### This blog post includes an analysis in which I build and compare machine learning models that predict residential energy usage from weather patterns. The full analysis is available in this [Github repository](https://github.com/kristinart/predicting-residential-energy-usage).
+
+Click on the tabs below to read the analysis!
+
+::: panel-tabset
+# Introduction
+Weather influences how much energy we use in our homes. The relationship between weather and energy consumption can therefore inform how to best plan and manage energy infrastructure to meet high energy demand events. [^1] Understanding this relationship at a fine temporal and spatial scale could allow us to mitigate the extent of weather-related energy strain and impact on people. This is especially relevant in today's day and age, as climate change alters regional temperatures and increases the frequency of extreme weather events. Improving the efficiency of energy consumption will work in tandem with grid modernization to meet climate and sustainability goals.
+
+[^1]: Thorve et al., 2023. https://www.nature.com/articles/s41597-022-01914-1#Tab1
+
+In this project, I investigate how energy use within residential homes varies based on weather. Past research has shown that there is significant variation in residential energy use within a day. [^2] This intuitively makes sense, as most people turn their lights on at night and use more cooking appliances around mealtimes. It's also well-known that more energy is consumed during the winter months in cold regions due to the generation of heat for warmth. Here, I use high-resolution data from residential apartments to build models that predict hourly energy consumption based on weather patterns.
+
+[^2]: Fikru and Gautier, 2015. https://www.sciencedirect.com/science/article/pii/S030626191500046X#ab005
+
+### Research Question
+
+What weather patterns are good predictors of residential energy usage in Massachussets homes?
+
+### Data
+
+I used data downloaded from the [University of Massachusetts (UMASS) Trace Repository](https://traces.cs.umass.edu/index.php/smart/smart). [^3] In particular, I used the Apartment dataset from the 2017 release of the UMASS Smart\* Dataset, which is a project that aims to optimize home energy consumption. The Apartment dataset contains minute-level electricity data and local weather conditions from 114 anonymous apartments in Massachussetts collected between 2014-2016.
+
+[^3]: Barker, S. UMass Smart\* Dataset - 2017 release. UMassTraceRepository https://traces.cs.umass.edu/index.php/smart/smart (2017).
+
+There are 114 individual data files with electricity data corresponding to individual apartments for each year, meaning there are a total of 342 files. There are also 3 data files containing weather data for each year.
+
+### Project Approach
+
+Before I dive right into the project, here is a brief overview of my approach: 
+
+- I began by loading, tidying, and exploring the data. During this phase, I aggregated the per-minute consumption data into hourly averages and randomly sampled a subset of the apartments to reduce the computational power required to perform the analysis. I also removed variables with a large amount of missing observations and performed a casewise deletion for smaller cases of missingness. 
+
+- Then I visually explored the remaining variables to determine whether I needed to make any specific adjustments in my models - I did find that three predictors were highly correlated (\> 90%), which informed my decision to reduce them into one principal component before running my models. 
+
+- Next, I split my clean data into training and testing datasets that were stratified on the outcome variable, split the training dataset into 5-folds for cross validation, and specified my model recipe. 
+
+- I then built, tuned, and compared the following model types: Linear Regression, K-Nearest Neighbor, Elastic Net Regression, Random Forest, and Gradient-Boosted Tree. 
+
+- I evaluated the performance of all model iterations based on root mean squared error (RMSE), finalized the workflow for the best model, and fit it to the testing dataset to determine how well it could predict energy consumption based on new data. 
+
+Now click on the tabs above to get into the details!
+
+# EDA
+
+## Load and Tidy Data
+
+
+```{r setup, warning = FALSE, results = FALSE, output = FALSE}
+library(tidyverse)
+library(tidymodels)
+library(janitor)
+library(ggplot2)
+library(kableExtra)
+library(here)
+library(lubridate)
+library(purrr)
+library(naniar)
+library(corrplot)
+library(showtext)
+library(googledrive)
+tidymodels_prefer()
+options(googledrive_quiet = TRUE) 
+
+# set seed to reproduce results
+set.seed(2244)
+
+# load fonts
+font_add_google(name = "Lato", family = "lato")
+showtext_auto()
+
+```
+
+
+Since there were a large amount of individual files that needed to be loaded, aggregated, and cleaned, I began by defining two functions:
+
+1)  The first function, `tidy_weather_data`, loads and aggregates data from all files that contain weather information, converts the column headers to lower snake case, and adds columns for time parameters (datetime, date, year, month, and hour) using the `tidyverse`, `janitor`, and `lubridate` packages. I decided to separate out the year, month, and hour columns to be their own predictors because I believe energy usage may vary based on them. I also filtered the dataset to only contain dates from noon on October 14, 2014 onward, as that is the first datetime for which data exists in the apartments dataset.
+
+
+```{r load and tidy weather data, eval = FALSE}
+# define list of weather files
+weather_files <- list.files(here::here("data/apartment-weather"), full.names = TRUE) 
+
+# define function to process and clean weather data
+tidy_weather_data <- function(file_path) {
+
+  df <- read_csv(file_path) %>% 
+    janitor::clean_names() %>% 
+    mutate(datetime = lubridate::as_datetime(time, origin = "1970-01-01", tz = "America/New_York"),  # Convert unix timestamp to Eastern datetime 
+           date = lubridate::date(datetime),
+           hour = lubridate::hour(datetime),
+           month = lubridate::month(datetime),
+           year = lubridate::year(datetime)) %>% 
+    filter(datetime >= lubridate::ymd_hms("2014-10-15 12:00:00")) # filter data to startdate of apartment data
+  
+  return(df)
+}
+
+# apply function over weather files 
+weather_data <- purrr::map_dfr(weather_files, tidy_weather_data)
+
+# inspect result df
+head(weather_data)
+summary(weather_data)
+```
+
+
+2)  The second function, `tidy_apartment_data`, loads and aggregates data from all files that contain electricity data, converts the column headers to lower snake case, and adds columns for time parameters (datetime, date, year, month, and hour) using the `tidyverse`, `janitor`, and `lubridate` packages. I also added a new column to the dataframe containing the unique apartment identification numbers, which were included in the file names. Lastly, I summarized the raw minute-level data into hourly average power use in kiloWatts to reduce the computational power required.
+
+
+```{r load and tidy apartment data, eval = FALSE}
+# define list of apartment files
+apt_files <- list.files(here::here("data/apartment"), pattern = ".csv", full.names = TRUE, recursive = TRUE) 
+
+# define function to process and clean apartment data
+tidy_apartment_data <- function(file_path) {
+  df <- read_csv(file_path, col_names = c("datetime", "power_kw"), col_types = cols(datetime = col_datetime(), power_kw = col_double())) %>%
+    janitor::clean_names() %>%
+    mutate(apt_id = as.numeric(stringr::str_extract(basename(file_path), "Apt(\\d+)_\\d{4}") %>% stringr::str_extract("(?<=Apt)\\d+")),
+           datetime = lubridate::ymd_hms(datetime),
+           date = lubridate::date(datetime),
+           hour = lubridate::hour(datetime),
+           month = lubridate::month(datetime),
+           year = lubridate::year(datetime)) %>%
+    group_by(date, hour, apt_id) %>%
+    summarize(hourly_average_power_kw = as.numeric(mean(as.numeric(power_kw), na.rm = TRUE))) %>%
+    ungroup()
+  
+  return(df)
+
+}
+
+# apply function over all apartment files 
+apt_data <- purrr::map_dfr(apt_files, tidy_apartment_data )
+
+# inspect result df
+head(apt_data)
+summary(apt_data)
+
+```
+
+
+After loading, aggregating, and cleaning all of the data (good job to my computer), I combined the weather dataset with the apartments dataset by joining them based on the common date and hour columns. I also defined the month, year, and apartment IDs as factors to make them easier to plot later on. Lastly, I randomly sampled 50 out of the 114 apartments in an effort to decrease the computational power and run time required for my machine learning models.
+
+
+```{r combine all data and tidy, eval = FALSE}
+# define random apartment ids to use for models
+apt_sample <- sample(1:114, 50, replace = FALSE)
+
+# combine weather and apartment data
+smart_df <- apt_data %>% 
+  full_join(weather_data, by = c("date", "hour"), relationship = "many-to-many") %>% 
+  mutate_at(vars(hour,hourly_average_power_kw, temperature, humidity, visibility, apparent_temperature, pressure, wind_speed, cloud_cover, wind_bearing, precip_intensity, dew_point, precip_probability), as.numeric) %>% 
+  mutate_at(vars(month, year, apt_id), as.factor) %>% 
+  filter(apt_id %in% apt_sample)
+
+# save combined df
+save(smart_df, file = "data/inter_data/smart_df.csv")
+```
+
+
+## Exploratory Data Analysis
+
+Once all my data was in one dataframe, my first real step was to figure out how much of it was missing. Here I used the `vis_miss()` function from the `naniar` package to visualize any missing values.
+
+
+```{r visualize nas, fig.align = "center", out.width = "100%"}
+# load combined df
+load(here::here("posts/2024-03-22-machine-learning-weather-energy/data/inter_data/smart_df.csv"))
+
+# visualize missing data
+smart_df %>%
+  naniar::vis_miss(warn_large_data = FALSE) +
+  theme(text = element_text(family = "lato"))
+```
+
+
+Surprisingly, the dataset was near-complete! Only 1.2% of it was missing (this might be a new record for me). Nearly all of the missing values were from the `cloud_cover` column. I wonder why this variable was missing so many observations in an otherwise comprehensive dataset - maybe cloud cover relied on manual human measurement while the other variables were automatically measured by instruments.
+
+Since the `cloud_cover` variable itself was missing 13% of observations and was not one of the most impactful predictor variables, I decided to drop the entire variable from the dataset. This way, I avoided losing 13% of the entire dataset like I would if I performed a complete case/ pairwise deletion.
+
+The rest of the variables in the dataset were missing between 0-1% of their values. Since this is such a small proportion, I decided to perform a complete case/ pairwise deletion across the entire dataset. If the proportion was higher, I would have imputed the missing values.
+
+
+```{r remove nas}
+# remove variables with missing data and non-useful data
+smart_mod <- smart_df %>% 
+  select(-cloud_cover) %>% 
+  drop_na()
+
+```
+
+
+Once all the missing values were taken care of, I took a peek at the data through descriptive and summary statistics.
+
+My final dataframe had 20 variables and 953,578 observations.
+
+
+```{r dim}
+# explore data  
+smart_mod %>% dim()
+```
+
+
+The column names of my dataframe were:
+
+
+```{r names}
+smart_mod %>% names()
+```
+
+
+It looked like the data type for all the variables were appropriate. Most of the variables were numeric while the `summary` and `icon` variables were categorical. The `apartment ID`, `month`, and `year` were all factors because I defined them to be factors above. Lastly, the `datetime` and `date` columns are POSIXct and Date objects, respectively.
+
+
+```{r str}
+smart_mod %>% str()
+```
+
+
+The summary statistics for all the variables are shown in the table below:
+
+
+```{r summary}
+smart_mod %>% summary() %>% 
+  kbl(caption = "Summary Statistics for all Variables in the Smart* Dataset") %>% 
+  kable_styling(full_width = F, font = "lato") %>% 
+  scroll_box(width = "100%", height = "200px")
+```
+
+
+Lastly, here's a look at the first few rows of the data in case you want to get a feel for it:
+
+
+```{r head}
+smart_mod %>% head() %>% 
+  kbl(caption = "First 6 Rows of the Smart* Dataset") %>% 
+  kable_styling(full_width = F, font = "lato") %>% 
+  scroll_box(width = "100%", height = "200px")
+
+```
+
+
+## Visual Exploratory Data Analysis
+
+Next, I began my favorite type of exploratory analysis - visualization!
+
+### Correlation Plot
+
+First off, I explored how correlated all of the numeric variables were by using the `corrplot()` function from the `corrplot` package to visualize a correlation matrix. It showed me that `temperature`, `apparent_temperature`, and `dew point` were highly positively correlated, which makes sense since they are physically related; since they were so highly correlated (> 90%), I decide to use a principal components analysis (PCA) in my model recipe below to collapse them into 1 feature instead of 3. Interestingly, these three variables were negatively correlated with `hourly_average_power_kw`, which is the outcome variable of interest. Another interesting finding is that `visibility` was negatively correlated to `humidity`, `precipitation intensity`, and `precipitation probability` - this makes sense since it is hard to see far while it's raining. The other correlations were also logical since weather variables are typically all related.
+
+
+```{r correlation plot, fig.align = "center", out.width = "100%", warning = FALSE}
+# correlation plot of all variables
+smart_mod %>%
+  select(where(is.numeric)) %>%
+  cor() %>%
+  corrplot(method = 'number', order = 'FPC', type = 'lower', family = "lato", number.cex=0.6, bg = "grey80") 
+
+```
+
+
+### Power Usage Distribution
+
+Next, I explored the distribution of `hourly_average_power_kw`, which is the outcome variable of interest. The outcome variable was highly positively skewed, as the vast majority of observations (order of $10^5$ - $10^6$) for each bin were between 0 - 10 kiloWatts. There were only a handful of observations (order of $10^1$) for each bin between 15 - 232 kiloWatts.
+
+
+```{r power histogram, fig.align = "center", out.width = "100%"}
+# histogram of energy usage
+ggplot(data = smart_mod, aes(x = hourly_average_power_kw))+
+  geom_histogram(fill = "#DAA49A", col = "#875053", bins = 150)+
+  labs(x = "Power Usage (kW)", y = "Count")+
+  theme_minimal()+
+  theme(text = element_text(family = "lato"))
+```
+
+
+### Power Usage by Month
+
+I visualized the relationship between power usage and month by making a box-and-whisket plot. As expected, power usage is lowest during the warm months (June - September) and highest during the cold months (November - February); this makes sense since most people crank up the heat in the winter months to stay warm. Interestingly, there were quite a few outliers for all of the months, which could mean some apartments use more energy in general.
+
+
+```{r monthly boxplot, fig.align = "center", out.width = "100%", warning = FALSE}
+# boxplot of energy usage against month
+ggplot(data = smart_mod, aes(x = factor(month, labels = month.name), y = hourly_average_power_kw, group = month))+
+  geom_boxplot(fill = "#DAA49A", col = "#875053")+
+  scale_y_continuous(limits = c(0,12))+
+  #geom_jitter(alpha = 0.4, col = "#DAA49A")+
+  labs(x = "Month", y = "Power (kW)")+
+  theme_minimal()+
+  theme(text = element_text(family = "lato"))
+
+```
+
+
+### Temperature Distribution
+
+Next, I explored the distribution of `temperature`, which I expect would have a significant impact on energy use. Temprature had a normal distribution with a slight left tail, indicating a small negative skew.
+
+
+```{r temp histogram, fig.align = "center", out.width = "100%"}
+# histogram of temperature
+ggplot(data = smart_mod, aes(x = temperature))+
+  # geom_histogram(aes(y = ..density..), bins = 50, fill = "#DAA49A", col = "#875053")+
+  # geom_density(linewidth = 1.5)+
+  geom_histogram(bins = 50, fill = "#DAA49A", col = "#875053")+
+  labs(x = "Temperature (deg F)", y = "Count")+
+  theme_minimal()+
+  theme(text = element_text(family = "lato"))
+
+```
+
+
+# Model Set-Up
+
+Next, I prepared my data for the machine learning models. Here, I randomly split the data into training and testing datasets, split the training dataset into 5 folds for k-fold cross validation, and specified a model recipe.
+
+### Split Training and Testing Data
+
+First off, I split the full dataset into training and testing datasets. Like the names imply, the training dataset will be used to train the models while the testing dataset will be used to test the predictive power of the models at the very end. I split the data using the `initial_split()` function from the `rsample` package. The split is stratified on the outcome variable, `hourly_average_power_kw`, to ensure that both the training and the testing datasets have roughly the same distribution of `hourly_average_power_kw`. I split the full dataset so that 3/4 of it becomes the training dataset and the remaining 1/4 becomes the testing dataset. This was to ensure there is a good amount of data for training while still retaining enough for substantial testing.
+
+
+```{r split data}
+# split data
+smart_split <- rsample::initial_split(smart_mod, 
+                                        prop = 0.75,
+                                        strata = hourly_average_power_kw)
+
+# assign splits to train and test objects
+smart_train <- rsample::training(smart_split)
+smart_test <- rsample::testing(smart_split)
+```
+
+
+### K-Fold Cross Validation
+
+I also performed a k-fold cross validation on my entire training set with k = 5. This splits the entire training set into 5 folds that each consist of a mini-training, or analysis set, and a mini-testing, or assessment set. Each of my models will be trained on the analysis sets and tested on the assessment sets of each fold and the mean performance metric across all folds will be reported. I used the `vfold` function from `rsample` to split the training dataset into 5 folds and stratified on the outcome variable once again to ensure that each subset of the data has the same distribution of `hourly_average_power_kw`.
+
+
+```{r kfold cv}
+# split data for k-fold CV
+smart_folds <- rsample::vfold_cv(smart_train, v = 5, strata = hourly_average_power_kw)
+
+```
+
+
+### Build Recipe
+
+Then I specified a recipe for the models to use. I used the `recipes` package to do things like define the model recipe, dummy code the categorical variables, center all predictors, scale all predictors, and reduce the dimensions of those highly correlated predictors I noticed during the EDA (`temperature`, `apparent_temperature`, and `dew_point`).
+
+My recipe tells my models to predict `hourly_average_power_kw` as a function of `temperature` + `humidity` + `visibility` + `summary` + `apparent_temperature` + `pressure` + `wind_speed` + `wind_bearing` + `precip_intensity` + `dew_point` + `precip_probability` + `year` + `month` + `hour` + `time`. The results from the pre-processing steps I specified are shown below.
+
+
+```{r}
+# define recipe
+smart_recipe <- recipes::recipe(hourly_average_power_kw ~ temperature + humidity + visibility + summary + apparent_temperature + pressure + wind_speed + wind_bearing + precip_intensity + dew_point + precip_probability + year + month + hour + time, data = smart_train) %>% 
+  recipes::step_dummy(all_nominal_predictors()) %>% # dummy code categorical variables
+  recipes::step_normalize(all_numeric_predictors(), -all_nominal_predictors()) %>% # center and scale numeric predictors only
+  recipes::step_pca(c("temperature", "apparent_temperature", "dew_point"), num_comp = 1) # convert highly correlated variables (>90) into 1 principal component
+
+#apply/view recipe
+smart_recipe %>% 
+  recipes::prep() %>% 
+  recipes::bake(new_data = smart_train) %>% 
+  head() %>% 
+  kable() %>% 
+  kable_styling(full_width = F, font = "lato") %>% 
+  scroll_box(width = "100%", height = "200px")
+```
+
+
+# Model Building
+
+Then it was finally time to build the predictive models! I used 5 different machine learning algorithms to do so: Linear Regression, K-Nearest Neighbor, Elastic Net Regression, Random Forest, and Gradient-Boosted Trees. All of the model types aside from the Linear Regression had specific hyperparameters that I could also tune; hyperparameters are parameters external to the actual modeled data that control the learning process and performance of a model.
+
+The general steps for building a model using `tidymodels` are:
+
+1)  Specify the model type, computational engine, model mode, and hyperparameters to tune (if applicable). Since my problem involves predicting a continuous outcome variable, I always set the mode to `regression` during this step.
+
+2)  Set up a workflow by combining the model specifications from step 1 with the model recipe.
+
+3)  Create a tuning grid with a range of values for each hyperparameter of the model. Then train and evaluate versions of the model that use different combinations of the hyperparameters using the training data set. Since I have a lot of data and this step can take a long time to run, I saved the model tuning results as .Rds files to avoid re-running the model tuning.
+
+4)  Compare the performance metric across all model versions and select the best one. Finalize the workflow with the best model and its specific hyperparameters.
+
+5)  Fit the final model to the testing dataset to evaluate its predictive performance on new data.
+
+Steps 1-3 were included in the code chunks below for each model type I explored. Step 4 was included in the next section, `Model Results`, and step 5 was included in the `Best Model Results` section below.
+
+### Linear Regression
+
+
+```{r eval = FALSE}
+# define model engine and mode
+lm_mod <- parsnip::linear_reg() %>% 
+  parsnip::set_engine("lm")
+
+# set up workflow
+lm_wkflow <- workflows::workflow() %>% 
+  workflows::add_model(lm_mod) %>% 
+  workflows::add_recipe(smart_recipe)
+
+# fit single lm model across all folds of training set
+lm_res <- tune::fit_resamples(lm_wkflow, resamples = smart_folds)
+
+# save en results
+save(lm_res, file = "data/inter_data/lm_res.rda")
+```
+
+
+### K-Nearest Neighbor
+
+
+```{r eval = FALSE}
+# define model engine and mode
+knn_mod <- parsnip::nearest_neighbor(neighbors = tune()) %>% 
+  parsnip::set_engine("kknn") %>% 
+  parsnip::set_mode("regression")
+
+# set up workflow
+knn_wkflow <- workflow() %>% 
+  workflows::add_model(knn_mod) %>% 
+  workflows::add_recipe(smart_recipe)
+
+# set up grid to tune neighbors
+knn_grid <- grid_regular(neighbors(range = c(1, 10)), levels = 5)
+
+```
+
+```{r eval = FALSE}
+# tune neighbors for knn
+knn_res <- tune::tune_grid(knn_wkflow, grid = knn_grid, resamples = smart_folds,
+                  control = control_grid(verbose = TRUE))
+
+# save en results
+save(knn_res, file = "data/inter_data/knn_res.rda")
+```
+
+
+### Elastic Net Regression
+
+
+```{r eval = FALSE}
+# set up model
+en_mod <- parsnip::linear_reg(penalty = tune(), mixture = tune()) %>%
+  parsnip::set_engine("glmnet") %>%
+  parsnip::set_mode("regression")
+
+# set up workflow
+en_wkflow <- workflows::workflow() %>%
+  workflows::add_model(en_mod) %>%
+  workflows::add_recipe(smart_recipe)
+
+# create a regular grid for tuning penalty and mixture 
+en_grid <- dials::grid_regular(penalty(range = c(0.01,3), trans = identity_trans()), mixture(range = c(0, 1)), levels = 10)
+
+```
+
+```{r eval = FALSE}
+# tune hyperparameters for en
+en_res <- tune::tune_grid(en_wkflow, grid = en_grid, resamples = smart_folds, 
+                          control = control_grid(verbose = TRUE))
+
+# save en results
+save(en_res, file = "data/inter_data/en_res.rda")
+```
+
+
+### Random Forest
+
+
+```{r eval = FALSE}
+# set up model
+rf_mod <- parsnip::rand_forest(mtry = tune(), 
+                               trees = tune(),
+                               min_n = tune()) %>%
+  set_engine("ranger", importance = "impurity") %>% 
+  set_mode("regression")
+
+# set up workflow
+rf_wkflow <- workflow() %>% 
+  add_model(rf_mod) %>% 
+  add_recipe(smart_recipe)
+
+# create a regular grid for tuning mtry, trees, and min_n
+rf_grid <- dials::grid_regular(mtry(range = c(1, 15)), # n predictors that will be randomly sampled at each split when creating tree models
+                               trees(range = c(200, 400)), # n of trees contained 
+                               min_n(range = c(10, 30)) # min n of data points in a node required for the node to be split further
+                               )
+
+```
+
+```{r eval = FALSE}
+# tune hyperparameters for rf
+rf_res <- tune::tune_grid(rf_wkflow, resamples = smart_folds, grid = rf_grid,
+                  control = control_grid(verbose = TRUE))
+
+# save rf results
+save(rf_res, file = "data/inter_data/rf_res.rda")
+```
+
+
+### Gradient-Boosted Tree
+
+
+```{r}
+# set up model
+bt_mod <- boost_tree(mtry = tune(),
+                     trees = tune(), 
+                     learn_rate = tune()) %>%
+  set_engine("xgboost") %>% 
+  set_mode("regression")
+
+# set up workflow
+bt_wkflow <- workflow() %>% 
+  add_model(bt_mod) %>% 
+  add_recipe(smart_recipe)
+
+# create a regular grid for tuning mtry, trees, and learning rate
+bt_grid <- grid_regular(mtry(range = c(1, 15)), 
+                        trees(range = c(200, 400)),
+                        learn_rate(range = c(-10, -1)),
+                        levels = 5)
+
+```
+
+```{r eval = FALSE}
+# tune hyperparameters for bt
+bt_res <- tune_grid(bt_wkflow, resamples = smart_folds, grid = bt_grid, control = control_grid(verbose = TRUE))
+
+# save rf results
+save(bt_res, file = "data/inter_data/bt_res.rda")
+
+```
+
+
+# Model Results
+
+After all of the models were built, I compared their performance by evaluating the root mean squared error (RMSE) values of each. The RMSE measures the magnitude of error between predicted and actual values - lower RMSE values therefore reflect better model performance. Some of the autoplots also displayed the $R^2$ values of the models, which measures the variance of the actual observed values where 1 is a perfect fit - higher $R^2$ values therefore reflect better model performance.
+
+I use the `autoplot` function to view each model's RMSE and the `show_best` function from the `tune` package to determine the best-performing models from those that I tuned.
+
+### Linear Regression
+
+There are no hyperparameters to tune in linear regression models, so I only developed one version of this model type. The mean RMSE across all 5 folds of the training data was `0.787` with a standard error of `0.00552`.
+
+
+```{r, warning = FALSE}
+# load lm results
+#load(here::here("posts/2024-03-22-machine-learning-weather-energy/data/inter_data/lm_res.rda"))
+
+# authenticate google drive api
+options(gargle_oauth_email = "kristinart21@gmail.com")
+
+# https://drive.google.com/file/d/1hcnd63aVF3jjjY6kEjwye84XoU4wrwt_/view?usp=sharing
+# define file id from google drive link
+file_id <- "1hcnd63aVF3jjjY6kEjwye84XoU4wrwt_"
+
+# download file and load into R
+drive_download(as_id(file_id), overwrite = TRUE)
+
+# load into R
+load("lm_res.rda")
+
+# show best model
+lm_res %>% tune::show_best(metric = "rmse")
+
+# save best model results
+lm_best <- lm_res %>% tune::show_best(metric = "rmse") %>% slice(1)
+```
+
+
+### K-Nearest Neighbor
+
+In K-Nearest Neighbor models, we can tune the `K` hyperparameter, which specified the number of neighbors that should be considered when evaluating an observation's expected value. I tuned my K-Nearest Model for 5 values of `K` between 1 to 10.
+
+Based on the autoplot, RMSE decreases and $R^2$ increases as the value of `K` increases. The best performing model version had `K = 10` with a mean RMSE across all 5 folds of `1.06` and a standard error of `0.00465`.
+
+
+```{r, fig.align = "center", out.width = "100%", warning = FALSE}
+# load knn results
+#load(here::here("posts/2024-03-22-machine-learning-weather-energy/data/inter_data/knn_res.rda"))
+
+# https://drive.google.com/file/d/1sTymXM0bfOHraxbZoZcTHd2a5sLTs_Ca/view?usp=drive_link
+# define file id from google drive link
+file_id <- "1sTymXM0bfOHraxbZoZcTHd2a5sLTs_Ca"
+
+# download file and load into R
+drive_download(as_id(file_id), overwrite = TRUE)
+
+# load into R
+load("knn_res.rda")
+
+# plot
+knn_res %>%
+  autoplot() +
+  theme_minimal() +
+  theme(text = element_text(family = "lato"))
+
+# show best models
+knn_res %>% tune::show_best(metric = "rmse")
+
+# save best model results
+knn_best <- knn_res %>% tune::show_best(metric = "rmse") %>% slice(1)
+
+```
+
+
+### Elastic Net Regression
+
+In Elastic Net Regression models, we can tune the `penalty` and `mixture` hyperparameters, which specify the amount of regularization and the balance between lasso and ridge penalties, respectively. I tuned my Elastic Net Regression models for 10 levels of `penalty` between 0.01 to 3 and 10 levels of `mixture` between 0 to 1. When `mixture = 0`, the model is actually performing a ridge regression and when `mixture = 1`, the model is performing a lasso regression.
+
+Based on the autoplot, RMSE decreases and $R^2$ increases as the values of `mixture`, or the proportion of lasso penalty, and `penalty`, or the amount of regularization, both decrease. The best performing model version had `mixture = 0.111`, which means it is much closer to being a ridge regression. The best model also had `penalty = 0.01`, a mean RMSE across all folds of `0.788`, and a standard error of `0.00552`.
+
+
+```{r, fig.align = "center", out.width = "100%", warning = FALSE}
+# load en results
+#load(here::here("posts/2024-03-22-machine-learning-weather-energy/data/inter_data/en_res.rda"))
+
+#https://drive.google.com/file/d/1SG3bzqmu669tUFdJleBxV8DIpbM34pxN/view?usp=drive_link
+# define file id from google drive link
+file_id <- "1SG3bzqmu669tUFdJleBxV8DIpbM34pxN"
+
+# download file and load into R
+drive_download(as_id(file_id), overwrite = TRUE)
+
+# load into R
+load("en_res.rda")
+
+# plot
+en_res %>%
+  autoplot() +
+  theme_minimal() +
+  theme(text = element_text(family = "lato"))
+
+# show best models
+en_res %>% tune::show_best(metric = "rmse")
+
+# save best model results
+en_best <- en_res %>% tune::show_best(metric = "rmse") %>% slice(1)
+```
+
+
+### Random Forest
+
+In random forest models, we can tune the `mtry`, `trees`, and `min_n` hyperparameters. `mtry` represents the number of parameters that can be randomly chosen from at each split of the tree. When `mtry` is less than 1, that means the tree will have no parameters to choose from. When `mtry = 15`, the tree has access to all of the predictors at each split, which is the same as bagging. I cannot use a `mtry` greater than 15 because my model recipe only includes 15 predictors, so I used 3 values between 1 to 15. `trees` represents the total number of trees to include in the forest ensemble. I used 3 values of trees between 200 to 400. `min_n` represents the minimum number of observations that need to be in a node in order for it to be split further. I used `min_n` values between 10 to 30 during the tuning process.
+
+Based on the autoplot, the number of trees does not make much of a difference in model performance, as all the colored lines are virtually on top of each other. The minimal node size did not appear to make much of a difference either, although it looks like `min_n = 30` had a slightly lower RMSE than the lower values. The models that had access to 8 parameters at every split consistently performed the best. The best model had `mtry = 8`, `trees = 300`, and `min_n = 30` with a mean RMSE across all folds of `0.760` and a standard error of `0.00563`.
+
+
+```{r, fig.align = "center", out.width = "100%", warning = FALSE}
+# load rf results
+#load(here::here("posts/2024-03-22-machine-learning-weather-energy/data/inter_data/rf_res.rda"))
+
+# https://drive.google.com/file/d/1D35V6XB1rZNdxx0WrcwS4uVeOSZKeeE6/view?usp=drive_link
+# define file id from google drive link
+file_id <- "1D35V6XB1rZNdxx0WrcwS4uVeOSZKeeE6"
+
+# download file and load into R
+drive_download(as_id(file_id), overwrite = TRUE)
+
+# load into R
+load("rf_res.rda")
+
+# plot
+rf_res %>% autoplot() + 
+  theme_minimal() +
+  theme(text = element_text(family = "lato"))
+
+# show best rf models
+rf_res %>% tune::show_best(metric = "rmse") 
+
+# save best model results
+rf_best <- rf_res %>% tune::show_best(metric = "rmse") %>% slice(1)
+```
+
+
+### Gradient-Boosted Tree
+
+In Gradient-Boosted Decision Tree models, we can tune the `mtry`, `trees`, `min_n`, and `learn_rate` hyperparameters. The first three were described above in the Random Forest model results and the last one, `learn_rate`, represents how fast the boosted tree changes with each iteration. When `learn_rate = 0`, the tree doesn't learn at all and at small values of `learn_rate`, the tree learns very slowly. I tuned my Gradient-Boosted Tree for 5 values of `learn_rate` between $10^{-10}$ to $10^{-1}$. Since this hyperparameter is the most impactful for gradient-boosted trees, I opted not to tune an alternative hyperparameter, `min_n` to reduce the computational power required. I did try out 5 values of `mtry` between 1 to 15 and 5 values of `trees` between 200 to 400 as well though.
+
+Based on the autoplot, models with larger learning rates had the best performance. The number of trees did not make as significant a difference and the number of parameters that were available at every split did not make as much of a difference in most models, although models with `mtry < 4` had slightly worse performance. The best performing model had `mtry = 15`, `trees = 200`, and `learn_rate = 0.1` with a mean RMSE across all folds of `0.755` and a standard error of `0.00568`.
+
+
+```{r, fig.align = "center", out.width = "100%", warning = FALSE}
+# load bt results
+#load(here::here("posts/2024-03-22-machine-learning-weather-energy/data/inter_data/bt_res.rda"))
+
+# https://drive.google.com/file/d/1btCSIyH50_q2OVKrinDxviv1QEN_nk_o/view?usp=drive_link
+# define file id from google drive link
+file_id <- "1btCSIyH50_q2OVKrinDxviv1QEN_nk_o"
+
+# download file and load into R
+drive_download(as_id(file_id), overwrite = TRUE)
+
+# load into R
+load("bt_res.rda")
+
+# plot
+bt_res %>% autoplot() + 
+  theme_minimal() +
+  theme(text = element_text(family = "lato"))
+
+# show best rf models
+bt_res %>% tune::show_best(metric = "rmse") 
+
+# save best model results
+bt_best <- bt_res %>% tune::show_best(metric = "rmse") %>% slice(1)
+
+```
+
+
+# Best Model Results
+
+Once I combined the lowest RMSE from each model type, it was clear that a Gradient-Boosted Tree was the winner! It had a slightly lower RMSE than the runner-ups and predicted `hourly_average_power_kw` values that deviate from the actual observed values by approximately 0.755 kw on average. As mentioned above, the best performing model had `mtry = 15`, `trees = 200`, and `learn_rate = 0.1` with a mean RMSE across all folds of `0.755` and a standard error of `0.00568`.
+
+
+```{r}
+# combine best performance results from each model type
+all_rmse <- tibble(Model = c("Linear Regression", "K-Nearest Neighbor", "Elastic Net Regression", "Random Forest", "Gradient-Boosted Trees"), RMSE = c(lm_best$mean, knn_best$mean, en_best$mean, rf_best$mean, bt_best$mean)) %>% 
+  mutate(RMSE = round(RMSE, 3)) %>% 
+  arrange(RMSE)
+
+all_rmse %>% 
+  kable() %>% 
+  kable_styling(full_width = F, font = "lato") 
+```
+
+
+Next I finalized the workflow using the hyperparameters from the best Gradient-Boosted Tree model and fit it to the entire training dataset.
+
+
+```{r}
+# save best model 
+best_mod <- bt_res %>% 
+  tune::select_best(metric = "rmse", mtries, trees, learn_rate)
+
+# finalize workflow with best model
+final_wkflow <- tune::finalize_workflow(bt_wkflow, best_mod)
+
+# fit model to training data
+final_fit_mod <- parsnip::fit(final_wkflow, smart_train)
+
+```
+
+
+One cool thing about tree-based models is we can visualize which predictors were the most significant drivers of the outcome through a variable importance plot (VIP). Based on the VIP for the best model, the PC1 feature was the most important predictor variable by far; remember, the PC1 feature was extracted from the original `temperature`, `apparent_temperature`, and `dew_point` parameters, which were highly correlated (> 90%) to each other. The `time` parameter was the second most important variable, followed by `hour` and `months`. This result makes sense, but surprised me! I was expecting more weather-related parameters to show up in the top 10.
+
+
+```{r, fig.align = "center", out.width = "100%"}
+# create variable importance plot using training data
+final_fit_mod %>% 
+  workflowsets::extract_fit_parsnip() %>% 
+  vip::vip(aesthetics = list(fill = "#DAA49A", color = "#875053")) +
+  theme_minimal() +
+  theme(text = element_text(family = "lato"))
+```
+
+
+Next, it was finally time to introduce the best model to data its never seen before! I ran the model on the testing dataset to see how well it could predict values it was not trained on. The model's RMSE on the testing dataset was 0.835, which is only slightly worse than the mean RMSE from the training process. This indicates that the training RMSE across 5-folds was a pretty good indicator of the model's overall performance.
+
+
+```{r}
+# assess model performance on entire testing set
+final_mod_test <- augment(final_fit_mod, smart_test) %>% 
+  rmse(truth = hourly_average_power_kw, estimate = .pred) %>% 
+  print()
+```
+
+
+When I plotted the predicted values of power usage against the actual observed values, it was clear that the model does not predict high values well at all; in fact, the model did not predict any power usage values higher than 3.75 kW. This is due to that strong positive skew in the outcome variable, which means even our best model was only trained with a handful of observations for the higher power usage values. Only the values that fall directly on the diagonal line in the plot below were accurately predicted by the model.
+
+
+```{r, fig.align = "center", out.width = "100%"}
+# plot predicted vs. actual values from testing data
+augment(final_fit_mod, smart_test) %>% 
+  ggplot(aes(x = .pred, y = hourly_average_power_kw)) +
+  geom_point(color = "#DAA49A", alpha = 0.2) +
+  geom_abline(lty = 2) +
+  coord_obs_pred() +
+  labs(title = "Predicted vs. Actual Values of Hourly Average Power Usage (kW)",
+       y = "Actual Hourly Average Power Usage (kW)",
+       y = "Predicted Hourly Average Power Usage (kW)") +
+  theme_minimal()+
+  theme(text = element_text(family = "lato"),
+        plot.title = element_text(hjust = 0.5))
+```
+
+```{r eval = FALSE}
+# Update this with fake or untested data for blog post when have mroe time. 
+# For fun, I used the model to predict residential power usage during the warmest and coolest observations in smart df. 
+# filter to observations with highest and lowest temperature
+extreme_temps <- smart_mod %>%
+  filter(row_number() == which.max(temperature) | row_number() == which.min(temperature))
+
+final_predictions <- augment(final_fit_mod, extreme_temps) %>% 
+  select(.pred, hourly_average_power_kw, temperature, everything())
+
+final_predictions 
+```
+
+
+## Conclusion
+
+The best model for predicting residential energy usage based on weather and time was a Gradient-Boosted Tree model. A Random Forest model did nearly as well, with only a small difference in RMSE separating the two. This is no surprise since decision tree-based models tend to work really well on many types of data. This is because tree-based models are highly flexible and non-parametric, meaning they do not assume any parametric constraints on the outcome variable. Interestingly, the Elastic Net Regression and Linear Regression models had a pretty similar performance to these top tree-based models, indicating that they also do a decent job of predicting residential energy usage; these model types could be more useful to a user who is willing to accept a little higher error in order to use models that are much less computationally expensive. The K-Nearest Neighbor model had the worst predictive power, which makes sense since KNN models tend to do poorly on data with too many predictors, or high dimensions.
+
+Overall, the best model did an okay job at predicting residential energy usage. The actual values of the outcome variable, `hourly_average_power_kw`, ranged between 0 to 11.5 kW. On average, the best model's predicted values were about 0.835 kW off from the actual observed values based on the testing RMSE; this means the model's average error was about 7% of the entire range. The model could be improved by adding in more data values that have high energy usage values. By normalizing the distribution of the outcome variable in this way, I could improve the model's learning and potentially improve its performance.
+
+It was interesting to see that the principal component of `temperature`, `apparent_temperature`, and `dew_point` was the most important predictor of residential energy usage. Since apparent temperature itself is also a factor of relative humidity and wind speed, this principal component feature may represent all the key weather predictors due to their inter-relatedness. Therefore, it makes sense that time variables (hour, time, month) would be the next most important predictors in the VIP rather than some of the general weather predictors that remained (descriptive weather summary, wind-bearing, etc.). This makes intuitive sense and it was fun to see it explained quantitatively. I learned a lot through this project and am looking forward to exploring more energy data with machine learning algorithms!
+
+:::
