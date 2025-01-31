@@ -79,7 +79,7 @@ Before I dive right into the project, here is a brief overview of my approach:
 
 - I evaluated the performance of all model iterations based on root mean squared error (RMSE), finalized the workflow for the best model, and fit it to the testing dataset to determine how well it could predict energy consumption based on new data. 
 
-Now click on the tabs to get into the details!
+Now click on the tabs above to get into the details!
 
 # EDA
 
@@ -209,7 +209,7 @@ Surprisingly, the dataset was near-complete! Only 1.2% of it was missing (this m
 
 Since the `cloud_cover` variable itself was missing 13% of observations and was not one of the most impactful predictor variables, I decided to drop the entire variable from the dataset. This way, I avoided losing 13% of the entire dataset like I would if I performed a complete case/ pairwise deletion.
 
-The rest of the variables in the dataset were missing between 0-1% of their values. Since this is such a small proportion, I decided to performa complete case/ pairwise deletion across the entire dataset. If the proportion was higher, I would have imputed the missing values.
+The rest of the variables in the dataset were missing between 0-1% of their values. Since this is such a small proportion, I decided to perform a complete case/ pairwise deletion across the entire dataset. If the proportion was higher, I would have imputed the missing values.
 
 ```{r remove nas}
 # remove variables with missing data and non-useful data
@@ -234,7 +234,7 @@ The column names of my dataframe were:
 smart_mod %>% names()
 ```
 
-It looked like the data type for all the variables are appropriate. Most of the variables were numeric while the `summary` and `icon` variables were categorical. The `apartment ID`, `month`, and `year` were all factors because I defined them to be factors above. Lastly, the `datetime` and `date` columns are POSIXct and Date objects, respectively.
+It looked like the data type for all the variables were appropriate. Most of the variables were numeric while the `summary` and `icon` variables were categorical. The `apartment ID`, `month`, and `year` were all factors because I defined them to be factors above. Lastly, the `datetime` and `date` columns are POSIXct and Date objects, respectively.
 
 ```{r str}
 smart_mod %>% str()
@@ -265,7 +265,7 @@ Next, I began my favorite type of exploratory analysis - visualization!
 
 ### Correlation Plot
 
-First off, I explored how correlated all of the numeric variables were by using the `corrplot()` function from the `corrplot` package to visualize a correlation matrix. It showed me that `temperature`, `apparent_temperature`, and `dew point` were highly positively correlated, which makes sense since they are physically related; since they were so highly correlated (\> 90%), I decide to use a principal components analysis (PCA) in my model recipe below to collapse them into 1 feature instead of 3. Interestingly, these three variables were negatively correlated with `hourly_average_power_kw`, which is the outcome variable of interest. Another interesting finding is that `visibility` was negatively correlated to `humidity`, `precipitation intensity`, and `precipitation probability` - this makes sense since it is hard to see far while it's raining. The other correlations were also logical since weather variables are typically all related.
+First off, I explored how correlated all of the numeric variables were by using the `corrplot()` function from the `corrplot` package to visualize a correlation matrix. It showed me that `temperature`, `apparent_temperature`, and `dew point` were highly positively correlated, which makes sense since they are physically related; since they were so highly correlated (> 90%), I decide to use a principal components analysis (PCA) in my model recipe below to collapse them into 1 feature instead of 3. Interestingly, these three variables were negatively correlated with `hourly_average_power_kw`, which is the outcome variable of interest. Another interesting finding is that `visibility` was negatively correlated to `humidity`, `precipitation intensity`, and `precipitation probability` - this makes sense since it is hard to see far while it's raining. The other correlations were also logical since weather variables are typically all related.
 
 ```{r correlation plot, fig.align = "center", out.width = "100%", warning = FALSE}
 # correlation plot of all variables
@@ -375,7 +375,7 @@ smart_recipe %>%
 
 # Model Building
 
-Then it was finally time to build the predictive models! I used 5 different machine learning algorithms to do so: Linear Regression, K-Nearest Neighbor, Elastic Net Regression, Random Forest, and Gradient-Boosted Trees. All of the model types aside from the Linear Regression had specific hyperparameters that I could tune; hyperparameters are parameters external to the actual modeled data that control the learning process and performance of a model.
+Then it was finally time to build the predictive models! I used 5 different machine learning algorithms to do so: Linear Regression, K-Nearest Neighbor, Elastic Net Regression, Random Forest, and Gradient-Boosted Trees. All of the model types aside from the Linear Regression had specific hyperparameters that I could also tune; hyperparameters are parameters external to the actual modeled data that control the learning process and performance of a model.
 
 The general steps for building a model using `tidymodels` are:
 
@@ -530,7 +530,7 @@ save(bt_res, file = "data/inter_data/bt_res.rda")
 
 # Model Results
 
-After all of the models were built, I compared their performance by evaluating the root mean squared error (RMSE) values of each. The RMSE (root mean squared error) measures the magnitude of error between predicted and actual values - lower RMSE values therefore reflect better model performance. Some of the autoplots also displayed the $R^2$ values of the models, which explains the variance of the actual observed values where 1 is a perfect fit - higher $R^2$ values therefore reflect better model performance.
+After all of the models were built, I compared their performance by evaluating the root mean squared error (RMSE) values of each. The RMSE measures the magnitude of error between predicted and actual values - lower RMSE values therefore reflect better model performance. Some of the autoplots also displayed the $R^2$ values of the models, which measures the variance of the actual observed values where 1 is a perfect fit - higher $R^2$ values therefore reflect better model performance.
 
 I use the `autoplot` function to view each model's RMSE and the `show_best` function from the `tune` package to determine the best-performing models from those that I tuned.
 
@@ -598,7 +598,7 @@ knn_best <- knn_res %>% tune::show_best(metric = "rmse") %>% slice(1)
 
 ### Elastic Net Regression
 
-In Elastic Net Regression models, we can tune the `penalty` and `mixture` hyperparameters, which specify the ..., respectively. I tuned my Elastic Net Regression models for 10 levels of `penalty` between 0.01 to 3 and 10 levels of `mixture` between 0 to 1. When `mixture = 0`, the model is actually performing a ridge regression and when `mixture = 1`, the model is performing a lasso regression.
+In Elastic Net Regression models, we can tune the `penalty` and `mixture` hyperparameters, which specify the amount of regularization and the balance between lasso and ridge penalties, respectively. I tuned my Elastic Net Regression models for 10 levels of `penalty` between 0.01 to 3 and 10 levels of `mixture` between 0 to 1. When `mixture = 0`, the model is actually performing a ridge regression and when `mixture = 1`, the model is performing a lasso regression.
 
 Based on the autoplot, RMSE decreases and $R^2$ increases as the values of `mixture`, or the proportion of lasso penalty, and `penalty`, or the amount of regularization, both decrease. The best performing model version had `mixture = 0.111`, which means it is much closer to being a ridge regression. The best model also had `penalty = 0.01`, a mean RMSE across all folds of `0.788`, and a standard error of `0.00552`.
 
@@ -631,9 +631,9 @@ en_best <- en_res %>% tune::show_best(metric = "rmse") %>% slice(1)
 
 ### Random Forest
 
-In random forest models, we can tune the `mtry`, `trees`, and `min_n` hyperparameters. `mtry` represents the number of parameters that can be randomly chosen from at each split of the tree. When `mtry` is less than 1, that means the tree will have no parameters to choose from. When `mtry = 15`, the tree has access to all of the predictors at each split, which is the same as bagging. I cannot use a `mtry` greater than 15 because my model recipe only includes 15 predictors, so I used 3 values between 1 to 15. `trees` represents the total number of trees to include in the forest ensemble. I used 3 values of trees between 200 to 400. `min_n` represents the minimum number of observations that need to be in a node in order for it to be split further. I used `min_n` values between 10 to 30 during the tuning process.\*\*
+In random forest models, we can tune the `mtry`, `trees`, and `min_n` hyperparameters. `mtry` represents the number of parameters that can be randomly chosen from at each split of the tree. When `mtry` is less than 1, that means the tree will have no parameters to choose from. When `mtry = 15`, the tree has access to all of the predictors at each split, which is the same as bagging. I cannot use a `mtry` greater than 15 because my model recipe only includes 15 predictors, so I used 3 values between 1 to 15. `trees` represents the total number of trees to include in the forest ensemble. I used 3 values of trees between 200 to 400. `min_n` represents the minimum number of observations that need to be in a node in order for it to be split further. I used `min_n` values between 10 to 30 during the tuning process.
 
-Based on the autoplot the number of trees does not make much of a difference in model performance, as all the colored lines are virtually on top of each other. The minimal node size did not appear to make much of a difference either, although it looks like `min_n = 30` had a slightly lower RMSE than the lower values. The models that had access to 8 parameters at every split consistently performed the best. The best model had `mtry = 8`, `trees = 300`, and `min_n = 30` with a mean RMSE across all folds of `0.760` and a standard error of `0.00563`.
+Based on the autoplot, the number of trees does not make much of a difference in model performance, as all the colored lines are virtually on top of each other. The minimal node size did not appear to make much of a difference either, although it looks like `min_n = 30` had a slightly lower RMSE than the lower values. The models that had access to 8 parameters at every split consistently performed the best. The best model had `mtry = 8`, `trees = 300`, and `min_n = 30` with a mean RMSE across all folds of `0.760` and a standard error of `0.00563`.
 
 ```{r, fig.align = "center", out.width = "100%", warning = FALSE}
 # load rf results
@@ -696,7 +696,7 @@ bt_best <- bt_res %>% tune::show_best(metric = "rmse") %>% slice(1)
 
 # Best Model Results
 
-Once I combined the lowest RMSE from each model type, it was clear that a Gradient-Boosted Tree was the winner! It has a slightly lower RMSE than the runner-ups and predicted `hourly_average_power_kw` values that deviate from the actual observed values by approximately 0.755 kw on average. As mentioned above, the best performing model had `mtry = 15`, `trees = 200`, and `learn_rate = 0.1` with a mean RMSE across all folds of `0.755` and a standard error of `0.00568`.
+Once I combined the lowest RMSE from each model type, it was clear that a Gradient-Boosted Tree was the winner! It had a slightly lower RMSE than the runner-ups and predicted `hourly_average_power_kw` values that deviate from the actual observed values by approximately 0.755 kw on average. As mentioned above, the best performing model had `mtry = 15`, `trees = 200`, and `learn_rate = 0.1` with a mean RMSE across all folds of `0.755` and a standard error of `0.00568`.
 
 ```{r}
 # combine best performance results from each model type
@@ -724,7 +724,7 @@ final_fit_mod <- parsnip::fit(final_wkflow, smart_train)
 
 ```
 
-One cool thing about tree-based models is we can visualize which predictors were the most significant drivers of the outcome through a variable importance plot (VIP). Based on the VIP for the best model, the PC1 feature was the most important predictor variable by far; remember, the PC1 feature was extracted from the original `temperature`, `apparent_temperature`, and `dew_point` parameters, which were highly correlated (\> 90%) to each other. The `time` parameter was the second most important variable, followed by `hour` and `months`. This result makes sense but surprised me! I was expecting more weather-related parameters to show up in the top 10.
+One cool thing about tree-based models is we can visualize which predictors were the most significant drivers of the outcome through a variable importance plot (VIP). Based on the VIP for the best model, the PC1 feature was the most important predictor variable by far; remember, the PC1 feature was extracted from the original `temperature`, `apparent_temperature`, and `dew_point` parameters, which were highly correlated (> 90%) to each other. The `time` parameter was the second most important variable, followed by `hour` and `months`. This result makes sense, but surprised me! I was expecting more weather-related parameters to show up in the top 10.
 
 ```{r, fig.align = "center", out.width = "100%"}
 # create variable importance plot using training data
@@ -780,6 +780,6 @@ The best model for predicting residential energy usage based on weather and time
 
 Overall, the best model did an okay job at predicting residential energy usage. The actual values of the outcome variable, `hourly_average_power_kw`, ranged between 0 to 11.5 kW. On average, the best model's predicted values were about 0.835 kW off from the actual observed values based on the testing RMSE; this means the model's average error was about 7% of the entire range. The model could be improved by adding in more data values that have high energy usage values. By normalizing the distribution of the outcome variable in this way, I could improve the model's learning and potentially improve its performance.
 
-It was interesting to see that the principal component of `temperature`, `apparent_temperature`, and `dew_point` is the most important predictor of residential energy usage. Since apparent temperature itself is also a factor of relative humidity and wind speed, this principal component feature may represent all the key weather predictors due to their interrelatedness. Therefore, it makes sense that time variables (hour, time, month) would be the next most important predictors in the VIP rather than some of the general weather predictors that remained (descriptive weather summary, wind-bearing, etc.). This makes intuitive sense and it was fun to see it explained quantitatively. I learned a lot through this project and am looking forward to exploring more energy data with machine learning algorithms!
+It was interesting to see that the principal component of `temperature`, `apparent_temperature`, and `dew_point` was the most important predictor of residential energy usage. Since apparent temperature itself is also a factor of relative humidity and wind speed, this principal component feature may represent all the key weather predictors due to their inter-relatedness. Therefore, it makes sense that time variables (hour, time, month) would be the next most important predictors in the VIP rather than some of the general weather predictors that remained (descriptive weather summary, wind-bearing, etc.). This makes intuitive sense and it was fun to see it explained quantitatively. I learned a lot through this project and am looking forward to exploring more energy data with machine learning algorithms!
 
 :::
