@@ -18,7 +18,7 @@ website:
       #   text: Portfolio
       - href: posts.qmd
         text: Projects
-      - href: figures/Art_Kristin_Resume_02022024.pdf
+      - href: figures/Art_Kristin_Resume_012025.pdf
         text: Resume
     
     right: 
@@ -31,7 +31,7 @@ website:
         
   page-footer: 
     left: 
-      - "Copyright 2024, Kristin Art"
+      - "Copyright 2025, Kristin Art"
 
 format:
   html:

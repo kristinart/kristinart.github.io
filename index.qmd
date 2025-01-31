@@ -27,7 +27,7 @@ My name is Kristin and I am an environmental scientist who loves playing with da
 ---
 
 ### Education
-**MS in Environmental Science & Management** (expected 2024)
+**MS in Environmental Science & Management** (2024)
 University of California, Santa Barbara
 
 **BS in Biological Sciences** (2019)
@@ -36,8 +36,11 @@ University of Southern California
 ---
 
 ### Experience
-**Environmental Trainee (2023-present)**
+**Greenhouse Gas Data Integration and Modeling Scientist** (2024-present)
+Washington Department of Ecology, Lacey, WA
+
+**Environmental Trainee** (2023-2024)
 Environmental Protection Agency, Washington, DC
 
-**Environmental Analyst (2020-2022)**
+**Environmental Analyst** (2020-2022)
 San Francisco Estuary Institute, Richmond, CA

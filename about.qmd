@@ -16,11 +16,27 @@ toc-title: Contents
 ![](figures/old_figures/IMG_1676.jpeg)
 ::: 
 
-I enjoy analyzing and visualizing data to tell stories about how electricity generation relates to emissions, ambient air quality, and environmental justice. I use both statistical analysis (including statistical machine learning algorithms) and spatial analysis to do so. I prefer to work in the R language and am in the process of populating the projects tab of this website with more of my recent work.
+I enjoy analyzing and visualizing data to tell stories about how electricity generation relates to emissions, ambient air quality, and environmental justice. I use both statistical analysis (including statistical machine learning algorithms) and spatial analysis to do so. I prefer to work in the R language and plan to populate the projects tab of this website with more of my recent work.
+
+## Washington Department of Ecology
+
+I am currently a Greenhouse Gas Data Integration and Modeling Scientist at the Washington State Department of Ecology. More specifically, I work in the Climate Pollution Prevention Program, which is responsible for implementing many of Washington's major climate policies like the Climate Commitment Act, Clean Fuel Standard, and Clean Vehicles Program. My team, the Greenhouse Gas (GHG) Inventory Unit, is responsible for the statewide GHG inventory, which acts as the yardstick to measure the success of various climate policies.
+
+At the moment, I am mainly focused on improving the methodology that Washington uses to estimate GHG emissions from the electricity sector. Thanks to the expertise I gained during graduate school and my previous position in the EPA, I am the team's go-to for all things electricity. For this work, I am developing R analysis scripts to calculate production- and consumption-based emissions from the electricity sector. As you may be aware, Washington's generation profile is rather clean thanks to the abundant hydropower we rely on. However, all states import and export electricity at times to meet demand appropriately. And sometimes the energy we import and use is generated through dirtier resources, like coal. Therefore, understanding all the emissions associated with the electricity Washington *consumes* instead of produces, paints a more accurate picture.
+
+So far, I've worn a lot of different hats in this role. I know I shouldn't just blab on endlessly here, but a few of the ones I'm most excited about include:
+
+- project and product planning for improving the statewide inventory methods, developing a SQL database for historic emissions data, and creating a pubic-facing interactive dashboard
+
+- serving on the model advisory committee for an economy-wide model on how Washington can meet its greenhouse gas emission reduction targets
+
+- co-authoring a legislative report on whether Washington should adjust its emission reduction targets based on emerging climate science. We are aiming to publish this report by May 2025.
+
+- co-authoring the most recent statewide inventory and performing QA/QC on the data. Through my QA/QC process, I discovered a few major errors that changed the results. We were ecstatic to have the analysis published earlier this year - [take a peek here if interested](https://apps.ecology.wa.gov/publications/SummaryPages/2414077.html).
 
 ## Graduate School
 
-I am currently a second-year Master's Student at the Bren School of Environmental Science & Management at the University of California, Santa Barbara. During my time at Bren, I have focused my coursework on data science while officially specializing in Corporate Sustainability and Energy & Climate. My main focus right now is finishing up my year-long [master's group project](https://bren.ucsb.edu/projects/identifying-geographic-feasibility-californias-hydrogen-hub), which aims to analyze the parity between potential supply and demand of hydrogen as an alternative fuel source in California. Our client for the project is the California Governor's Office of Business & Economic Development and I serve as both a Data Analyst and Financial Manager.
+In June 2024, I completed a two-year Master's Program at the Bren School of Environmental Science & Management at the University of California, Santa Barbara. During my time at Bren, I focused my coursework on data science while officially specializing in Corporate Sustainability and Energy & Climate. During the last year of the program, I was immersed in completing my capstone [master's group project](https://bren.ucsb.edu/projects/identifying-geographic-feasibility-californias-hydrogen-hub), which analyzed the parity between potential supply and demand of hydrogen as an alternative fuel source in California. Our client for the project was the California Governor's Office of Business & Economic Development and I served as the main Data Analyst and Financial Manager.
 
 ## Environmental Protection Agency
 
@@ -81,7 +97,7 @@ After receiving my Associate of Science in 2013, I decided I was ahead of the ga
 
 ## Hobbies
 
-In my free time these days, I love to mountain bike, camp, cook, swim, read, and puzzle. In 2020, I went on my first bikepacking trip and fell in love. Since then, I've gone on 7 or so multi-day trips with amazing friends in places like Tahoe National Forest, the Lost Coast, Catalina Island, and more. Please enjoy the photos below as we collectively pretend we are in the mountains instead of behind a desk. I also love spending time with my cuddly cat, Lilo. 
+In my free time these days, I love to mountain bike, camp, cook, swim, read, and puzzle. In 2020, I went on my first bikepacking trip and fell in love. Since then, I've gone on 8 or so multi-day trips with amazing friends in places like Tahoe National Forest, the Lost Coast, Catalina Island, and more. Please enjoy the photos below as we collectively pretend we are in the mountains instead of behind a desk. I also love spending time with my cuddly cat, Lilo. 
 
 ::: {layout-ncol="2"}
 ![Bikepacking Catalina Island (2023)](figures/catalina_2023.jpg)
