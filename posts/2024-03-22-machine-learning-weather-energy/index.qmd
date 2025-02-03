@@ -598,7 +598,7 @@ knn_best <- knn_res %>% tune::show_best(metric = "rmse") %>% slice(1)
 
 ### Elastic Net Regression
 
-In Elastic Net Regression models, we can tune the `penalty` and `mixture` hyperparameters, which specify the amount of regularization and the balance between lasso and ridge penalties, respectively. I tuned my Elastic Net Regression models for 10 levels of `penalty` between 0.01 to 3 and 10 levels of `mixture` between 0 to 1. When `mixture = 0`, the model is actually performing a ridge regression and when `mixture = 1`, the model is performing a lasso regression.
+In Elastic Net Regression models, we can tune the `penalty` and `mixture` hyperparameters, which specify the amount of regularization and the mix of lasso and ridge penalties, respectively. I tuned my Elastic Net Regression models for 10 levels of `penalty` between 0.01 to 3 and 10 levels of `mixture` between 0 to 1. When `mixture = 0`, the model is actually performing a ridge regression and when `mixture = 1`, the model is performing a lasso regression.
 
 Based on the autoplot, RMSE decreases and $R^2$ increases as the values of `mixture`, or the proportion of lasso penalty, and `penalty`, or the amount of regularization, both decrease. The best performing model version had `mixture = 0.111`, which means it is much closer to being a ridge regression. The best model also had `penalty = 0.01`, a mean RMSE across all folds of `0.788`, and a standard error of `0.00552`.
 
