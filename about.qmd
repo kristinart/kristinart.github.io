@@ -26,13 +26,13 @@ At the moment, I am mainly focused on improving the methodology that Washington 
 
 So far, I've worn a lot of different hats in this role. I know I shouldn't just blab on endlessly here, but a few of the ones I'm most excited about include:
 
-- project and product planning for improving the statewide inventory methods, developing a SQL database for historic emissions data, and creating a pubic-facing interactive dashboard
+- project and product planning for improving the statewide inventory methods, developing a SQL database for historic emissions data, and creating a public-facing interactive dashboard
 
 - serving on the model advisory committee for an economy-wide model on how Washington can meet its greenhouse gas emission reduction targets
 
-- co-authoring a legislative report on whether Washington should adjust its emission reduction targets based on emerging climate science. We are aiming to publish this report by May 2025.
+- co-authoring a legislative report on whether Washington should adjust its emission reduction targets based on emerging climate science
 
-- co-authoring the most recent statewide inventory and performing QA/QC on the data. Through my QA/QC process, I discovered a few major errors that changed the results. We were ecstatic to have the analysis published earlier this year - [take a peek here if interested](https://apps.ecology.wa.gov/publications/SummaryPages/2414077.html).
+- co-authoring the most recent statewide inventory and performing QA/QC on the data. Through my QA/QC process, I discovered a few major errors that changed the results. We were ecstatic to have the analysis published earlier this year - [take a peek here if interested](https://apps.ecology.wa.gov/publications/SummaryPages/2414077.html)
 
 ## Graduate School
 

@@ -696,7 +696,7 @@ bt_best <- bt_res %>% tune::show_best(metric = "rmse") %>% slice(1)
 
 # Best Model Results
 
-Once I combined the lowest RMSE from each model type, it was clear that a Gradient-Boosted Tree was the winner! It had a slightly lower RMSE than the runner-ups and predicted `hourly_average_power_kw` values that deviate from the actual observed values by approximately 0.755 kw on average. As mentioned above, the best performing model had `mtry = 15`, `trees = 200`, and `learn_rate = 0.1` with a mean RMSE across all folds of `0.755` and a standard error of `0.00568`.
+Once I combined the lowest RMSE from each model type, it was clear that a Gradient-Boosted Tree was the winner! It had a slightly lower RMSE than the runner-ups and predicted `hourly_average_power_kw` values that deviate from the actual observed values by approximately 0.755 kw on average. As I mentioned above, the best performing model had `mtry = 15`, `trees = 200`, and `learn_rate = 0.1` with a mean RMSE across all folds of `0.755` and a standard error of `0.00568`.
 
 ```{r}
 # combine best performance results from each model type
